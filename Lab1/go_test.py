@@ -82,6 +82,7 @@ def plot_go(go_arr, txt='Default'):
 # Rule judgement  *need finish
 #-------------------------------------------------------
 def is_alive(check_state, go_arr, i, j, color_type):
+  # 判断(i, j)位置是否存活
   '''
   This function checks whether the point (i,j) and its connected points with the same color are alive, it can only be used for white/black chess only
   Depth-first searching.
@@ -94,6 +95,7 @@ def is_alive(check_state, go_arr, i, j, color_type):
   pass
 
 def go_judege(go_arr):
+  # 判断是否符合规则
   '''
   :param go_arr: the numpy array contains the chess board
   :return: whether this chess board fit the go rules in the document
@@ -120,6 +122,7 @@ def go_judege(go_arr):
 # User strategy  *need finish
 #-------------------------------------------------------
 def user_step_eat(go_arr):
+  # 吃子
   '''
   :param go_arr: chessboard
   :return: ans=>where to put one step forward for white chess pieces so that some black chess pieces will be killed; user_arr=> the result chessboard after the step
@@ -127,6 +130,7 @@ def user_step_eat(go_arr):
   pass
 
 def user_setp_possible(go_arr):
+  # 输出所有白棋的下一步
   '''
   :param go_arr: chessboard
   :return: ans=> all the possible locations to put one step forward for white chess pieces
