@@ -103,27 +103,39 @@ def is_alive(check_state, go_arr, i, j, color_type):
     while len(explore) > 0:
         (row, col) = explore.pop()
         checked.add((row, col))
-        if near_zero(go_arr, row, col):
+        if near_zero(go_arr, row, col, BOARD_SIZE):
             return POINT_STATE_ALIVE
-        elif next_on_board(row, col, "w") and (row - 1, col) not in checked and (row - 1, col) != -1:
-            explore.append(row - 1, col)
+        elif next_on_board(row, col, "w", BOARD_SIZE) and (row - 1, col) not in checked and (row - 1, col) != -1:
+            explore.append((row - 1, col))
             continue
-        elif next_on_board(row, col, "a") and (row, col - 1) not in checked and (row, col - 1) != -1:
-            explore.append(row, col - 1)
+        elif next_on_board(row, col, "a", BOARD_SIZE) and (row, col - 1) not in checked and (row, col - 1) != -1:
+            explore.append((row, col - 1))
             continue
-        elif next_on_board(row, col, "s") and (row + 1, col) not in checked and (row + 1, col) != -1:
-            explore.append(row + 1, col)
+        elif next_on_board(row, col, "s", BOARD_SIZE) and (row + 1, col) not in checked and (row + 1, col) != -1:
+            explore.append((row + 1, col))
             continue
-        elif next_on_board(row, col, "d") and (row, col + 1) not in checked and (row, col + 1) != -1:
-            explore.append(row, col + 1)
+        elif next_on_board(row, col, "d", BOARD_SIZE) and (row, col + 1) not in checked and (row, col + 1) != -1:
+            explore.append((row, col + 1))
             continue
         else:
-            pass
+            continue
     return POINT_STATE_NOT_ALIVE
 
 
-def near_zero(go_arr, i, j):
-    return go_arr[i, j - 1] == 0 or go_arr[i, j + 1] == 0 or go_arr[i - 1, j] == 0 or go_arr[i + 1, j] == 0
+def near_zero(go_arr, i, j, BOARD_SIZE):
+    '''
+    check whether adjacent points are blank.
+    '''
+    flag = False
+    if i - 1 > 0:
+        flag = flag or go_arr[i - 1, j] == 0
+    if j - 1 > 0:
+        flag = flag or go_arr[i, j - 1] == 0
+    if j + 1 < BOARD_SIZE:
+        flag = flag or go_arr[i, j + 1] == 0
+    if i + 1 < BOARD_SIZE:
+        flag = flag or go_arr[i + 1, j] == 0
+    return flag
 
 
 def next_on_board(i, j, direction, BOARD_SIZE):
@@ -201,33 +213,33 @@ if __name__ == "__main__":
     # The first problem: rule checking
     problem_tag = "Problem 0: rule checking"
     go_arr = read_go('{}_0.txt'.format(file_tag))
-    plot_go(go_arr, problem_tag)
+    # plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
     print("{}:{}".format(problem_tag, chess_rule_monitor))
-    plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+    # plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
     problem_tag = "Problem 00: rule checking"
     go_arr = read_go('{}_00.txt'.format(file_tag))
-    plot_go(go_arr, problem_tag)
+    # plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
     print("{}:{}".format(problem_tag, chess_rule_monitor))
-    plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+    # plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
-    # The second~fifth prolbem: forward one step and eat the adverse points on the chessboard
-    for i in range(1, 5):
-        problem_tag = "Problem {}: forward on step".format(i)
-        go_arr = read_go('{}_{}.txt'.format(file_tag, i))
-        plot_go(go_arr, problem_tag)
-        chess_rule_monitor = go_judege(go_arr)
-        # ans, user_arr = user_step_eat(go_arr) # need finish
-        print("{}:{}".format(problem_tag, ans))
-        plot_go(user_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
-
-    # The sixth problem: find all the postion which can place a white chess pieces
-    problem_tag = "Problem {}: all possible position".format(5)
-    go_arr = read_go('{}_{}.txt'.format(file_tag, 5))
-    plot_go(go_arr, problem_tag)
-    chess_rule_monitor = go_judege(go_arr)
-    # ans = user_setp_possible(go_arr) # need finish
-    print("{}:{}".format(problem_tag, ans))
-    plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+    # # The second~fifth prolbem: forward one step and eat the adverse points on the chessboard
+    # for i in range(1, 5):
+    #     problem_tag = "Problem {}: forward on step".format(i)
+    #     go_arr = read_go('{}_{}.txt'.format(file_tag, i))
+    #     plot_go(go_arr, problem_tag)
+    #     chess_rule_monitor = go_judege(go_arr)
+    #     # ans, user_arr = user_step_eat(go_arr) # need finish
+    #     print("{}:{}".format(problem_tag, ans))
+    #     plot_go(user_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+    #
+    # # The sixth problem: find all the postion which can place a white chess pieces
+    # problem_tag = "Problem {}: all possible position".format(5)
+    # go_arr = read_go('{}_{}.txt'.format(file_tag, 5))
+    # plot_go(go_arr, problem_tag)
+    # chess_rule_monitor = go_judege(go_arr)
+    # # ans = user_setp_possible(go_arr) # need finish
+    # print("{}:{}".format(problem_tag, ans))
+    # plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
