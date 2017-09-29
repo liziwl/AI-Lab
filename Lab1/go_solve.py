@@ -86,12 +86,11 @@ def plot_go(go_arr, txt='Default'):
 # -------------------------------------------------------
 # Rule judgement  *need finish
 # -------------------------------------------------------
-def is_alive(check_state, go_arr, i, j, color_type):
+def is_alive(go_arr, i, j, color_type):
     # 判断(i, j)位置是否存活
     '''
     This function checks whether the point (i,j) and its connected points with the same color are alive, it can only be used for white/black chess only
     Depth-first searching.
-    :param check_state: The guard array to verify whether a point is checked
     :param go_arr: chess board
     :param i: x-index of the start point of searching
     :param j: y-index of the start point of searching
@@ -103,38 +102,38 @@ def is_alive(check_state, go_arr, i, j, color_type):
     while len(explore) > 0:
         (row, col) = explore.pop()
         checked.add((row, col))
-        if near_zero(go_arr, row, col, BOARD_SIZE):
+        if near_none(go_arr, row, col, BOARD_SIZE):
             return POINT_STATE_ALIVE
-        elif next_on_board(row, col, "w", BOARD_SIZE) and (row - 1, col) not in checked and go_arr[row - 1, col] == color_type:
+        if next_on_board(row, col, "w", BOARD_SIZE) and (row - 1, col) not in checked and go_arr[
+                    row - 1, col] == color_type:
             explore.append((row - 1, col))
-            continue
-        elif next_on_board(row, col, "a", BOARD_SIZE) and (row, col - 1) not in checked and go_arr[row, col - 1] == color_type:
+        if next_on_board(row, col, "a", BOARD_SIZE) and (row, col - 1) not in checked and go_arr[
+            row, col - 1] == color_type:
             explore.append((row, col - 1))
-            continue
-        elif next_on_board(row, col, "s", BOARD_SIZE) and (row + 1, col) not in checked and go_arr[row + 1, col] == color_type:
+        if next_on_board(row, col, "s", BOARD_SIZE) and (row + 1, col) not in checked and go_arr[
+                    row + 1, col] == color_type:
             explore.append((row + 1, col))
-            continue
-        elif next_on_board(row, col, "d", BOARD_SIZE) and (row, col + 1) not in checked and go_arr[row, col + 1] == color_type:
+        if next_on_board(row, col, "d", BOARD_SIZE) and (row, col + 1) not in checked and go_arr[
+            row, col + 1] == color_type:
             explore.append((row, col + 1))
-            continue
         else:
             continue
     return POINT_STATE_NOT_ALIVE
 
 
-def near_zero(go_arr, i, j, BOARD_SIZE):
+def near_none(go_arr, i, j, BOARD_SIZE):
     '''
     check whether adjacent points are blank.
     '''
     flag = False
-    if i - 1 > 0:
-        flag = flag or go_arr[i - 1, j] == 0
-    if j - 1 > 0:
-        flag = flag or go_arr[i, j - 1] == 0
+    if i - 1 >= 0:
+        flag = flag or go_arr[i - 1, j] == COLOR_NONE
+    if j - 1 >= 0:
+        flag = flag or go_arr[i, j - 1] == COLOR_NONE
     if j + 1 < BOARD_SIZE:
-        flag = flag or go_arr[i, j + 1] == 0
+        flag = flag or go_arr[i, j + 1] == COLOR_NONE
     if i + 1 < BOARD_SIZE:
-        flag = flag or go_arr[i + 1, j] == 0
+        flag = flag or go_arr[i + 1, j] == COLOR_NONE
     return flag
 
 
@@ -155,7 +154,7 @@ def next_on_board(i, j, direction, BOARD_SIZE):
     else:
         row = i
         col = j + 1
-    return row > 0 and row < BOARD_SIZE and col > 0 and col < BOARD_SIZE
+    return row >= 0 and row < BOARD_SIZE and col >= 0 and col < BOARD_SIZE
 
 
 def go_judege(go_arr):
@@ -166,33 +165,99 @@ def go_judege(go_arr):
              False => unfit rule
              True => ok
     '''
-    is_fit_go_rule = True
-    check_state = np.zeros(go_arr.shape)
-    check_state[:] = POINT_STATE_EMPYT
-    tmp_indx = np.where(go_arr != 0)
-    check_state[tmp_indx] = POINT_STATE_UNCHECKED
-    for i in range(go_arr.shape[0]):
-        for j in range(go_arr.shape[1]):
-            if check_state[i, j] == POINT_STATE_UNCHECKED:
-                tmp_alive = is_alive(check_state, go_arr, i, j, go_arr[i, j])
-                if tmp_alive == POINT_STATE_NOT_ALIVE:  # once the go rule is broken, stop the searching and return the state
-                    is_fit_go_rule = False
-                    break
-            else:
-                pass  # pass if the point and its lined points are checked
-    return is_fit_go_rule
+    white = is_dead(go_arr, COLOR_WHITE)
+    black = is_dead(go_arr, COLOR_BLACK)
+    return not white and not black
 
 
 # -------------------------------------------------------
 # User strategy  *need finish
 # -------------------------------------------------------
+def is_dead(go_arr, color_type):
+    # 判断某种颜色是否有死棋
+    '''
+    :param go_arr: the numpy array contains the chess board
+    :param color_type: -1 is black, 1 is white.
+    :return: whether this chess board fit the go rules in the document
+             False => no dead
+             True => has dead
+    '''
+    dead = False
+    check_state = np.zeros(go_arr.shape)
+    check_state[:] = POINT_STATE_EMPYT
+    tmp_indx = np.where(go_arr == color_type)
+    check_state[tmp_indx] = POINT_STATE_UNCHECKED
+    for i in range(go_arr.shape[0]):
+        if dead == False:
+            for j in range(go_arr.shape[1]):
+                if check_state[i, j] == POINT_STATE_UNCHECKED:
+                    tmp_alive = is_alive(go_arr, i, j, go_arr[i, j])
+                    if tmp_alive == POINT_STATE_NOT_ALIVE:  # once the go rule is broken, stop the searching and return the state
+                        dead = True
+                        break
+                else:
+                    pass  # pass if the point and its lined points are checked
+        else:
+            break
+    return dead
+
+
+def which_dead(go_arr, color_type):
+    has_dead = []
+    color_pt = np.zeros(go_arr.shape)
+    color_pt[:] = POINT_STATE_EMPYT
+    tmp_indx = np.where(go_arr == color_type)
+    color_pt[tmp_indx] = POINT_STATE_UNCHECKED
+    for i in range(go_arr.shape[0]):
+        for j in range(go_arr.shape[1]):
+            if color_pt[i, j] == POINT_STATE_UNCHECKED:
+                tmp_alive = is_alive(go_arr, i, j, go_arr[i, j])
+                if tmp_alive == POINT_STATE_NOT_ALIVE:
+                    has_dead.append((i, j))
+    return has_dead
+
+
+def eat_dead(go_arr, color_type):
+    wait_del = []
+    optional = np.zeros(go_arr.shape)
+    tmp_indx = np.where(go_arr == color_type)
+    optional[tmp_indx] = 6
+    for i in range(go_arr.shape[0]):
+        for j in range(go_arr.shape[1]):
+            if optional[i, j] == 6:
+                wait_del = wait_del + which_dead(go_arr, color_type)  # get list dead point
+
+    for point in wait_del:
+        (row, col) = point
+        go_arr[row, col] = COLOR_NONE
+
+
 def user_step_eat(go_arr):
     # 吃子
     '''
     :param go_arr: chessboard
     :return: ans=>where to put one step forward for white chess pieces so that some black chess pieces will be killed; user_arr=> the result chessboard after the step
     '''
-    pass
+    ans = []
+    optional = np.zeros(go_arr.shape)
+    tmp_indx = np.where(go_arr == COLOR_NONE)
+    optional[tmp_indx] = 6
+    for i in range(go_arr.shape[0]):
+        for j in range(go_arr.shape[1]):
+            if optional[i, j] == 6:
+                go_arr[i, j] = COLOR_WHITE
+                dead = is_dead(go_arr, COLOR_BLACK)
+                if dead == True:
+                    ans.append((i, j))
+                go_arr[i, j] = COLOR_NONE
+            else:
+                pass
+
+    for point in ans:
+        (row, col) = point
+        go_arr[row, col] = COLOR_WHITE
+        eat_dead(go_arr, COLOR_BLACK)
+    return ans, go_arr
 
 
 def user_setp_possible(go_arr):
@@ -201,7 +266,22 @@ def user_setp_possible(go_arr):
     :param go_arr: chessboard
     :return: ans=> all the possible locations to put one step forward for white chess pieces
     '''
-    pass
+    ans = []
+    optional = np.zeros(go_arr.shape)
+    tmp_indx = np.where(go_arr == COLOR_NONE)
+    optional[tmp_indx] = 6
+    for i in range(go_arr.shape[0]):
+        for j in range(go_arr.shape[1]):
+            if optional[i, j] == 6:
+                go_arr[i, j] = COLOR_WHITE
+                white = is_alive(go_arr, i, j, COLOR_WHITE) == POINT_STATE_ALIVE
+                if near_none(go_arr, i, j, BOARD_SIZE) or white:
+                    ans.append((i, j))
+                else:
+                    if is_dead(go_arr, COLOR_BLACK):
+                        ans.append((i, j))
+                go_arr[i, j] = COLOR_NONE
+    return ans
 
 
 if __name__ == "__main__":
@@ -209,37 +289,51 @@ if __name__ == "__main__":
     problem_tag = "Default"
     ans = []
     user_arr = np.zeros([0, 0])
+    fp = open("answer_for_train_try.txt", "w+")
 
     # The first problem: rule checking
     problem_tag = "Problem 0: rule checking"
     go_arr = read_go('{}_0.txt'.format(file_tag))
-    # plot_go(go_arr, problem_tag)
+    fp.write('{}_0'.format(file_tag) + "\n")
+    plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
     print("{}:{}".format(problem_tag, chess_rule_monitor))
-    # plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+    fp.write(str(chess_rule_monitor) + "\n\n")
+    plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
     problem_tag = "Problem 00: rule checking"
     go_arr = read_go('{}_00.txt'.format(file_tag))
-    # plot_go(go_arr, problem_tag)
+    fp.write('{}_00'.format(file_tag) + "\n")
+    plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
     print("{}:{}".format(problem_tag, chess_rule_monitor))
-    # plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+    fp.write(str(chess_rule_monitor) + "\n\n")
+    plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
     # The second~fifth prolbem: forward one step and eat the adverse points on the chessboard
     for i in range(1, 5):
         problem_tag = "Problem {}: forward on step".format(i)
         go_arr = read_go('{}_{}.txt'.format(file_tag, i))
-        # plot_go(go_arr, problem_tag)
+        fp.write('{}_{}'.format(file_tag, i) + "\n")
+        plot_go(go_arr, problem_tag)
         chess_rule_monitor = go_judege(go_arr)
-        # ans, user_arr = user_step_eat(go_arr) # need finish
+        ans, user_arr = user_step_eat(go_arr)  # need finish
         print("{}:{}".format(problem_tag, ans))
-        # plot_go(user_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+        for point in ans:
+            fp.write("{} {}\n".format(point[0], point[1]))
+        fp.write("\n")
+        plot_go(user_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
     # The sixth problem: find all the postion which can place a white chess pieces
     problem_tag = "Problem {}: all possible position".format(5)
     go_arr = read_go('{}_{}.txt'.format(file_tag, 5))
-    # plot_go(go_arr, problem_tag)
+    fp.write('{}_{}'.format(file_tag, 5) + "\n")
+    plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
-    # ans = user_setp_possible(go_arr) # need finish
+    ans = user_setp_possible(go_arr)  # need finish
     print("{}:{}".format(problem_tag, ans))
-    # plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+    for point in ans:
+        fp.write("{} {}\n".format(point[0], point[1]))
+    plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
+
+    fp.close()
