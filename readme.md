@@ -2,9 +2,9 @@
 ## Lab1 - go
 示例文件共有7个（train_0.txt, train_00.txt, train_1.txt ~ train_5.txt），其中每个示例文件存放一个围棋残局，存放格式为“行数 列数 颜色”，-1表示⿊色，1表示白色，
 ### 要求
-1. train_0.txt和train_00.txt检测程序对围棋规则的判定
-2. train_1.txt ~ train_4.txt的要求是“给出所有可以提子的位置”
-3. train_5.txt的要求是“给出所有可以落子的位置”，
+1. train_0.txt和train_00.txt 检测程序对基本围棋规则的判定。
+2. train_1.txt ~ train_4.txt的要求是列出落一子使得可以提对方子的位置，并绘出该位置，以及提子后的结果。
+3. train_5.txt的要求是给出下一步所有可以落子的位置。
 
 ### numpy
 * np.zeros((BOARD_SIZE, BOARD_SIZE))创建数组，参数为维度
