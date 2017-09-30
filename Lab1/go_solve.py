@@ -82,10 +82,6 @@ def plot_go(go_arr, txt='Default'):
                            outline='white')
     root.mainloop()
 
-
-# -------------------------------------------------------
-# Rule judgement  *need finish
-# -------------------------------------------------------
 def is_alive(go_arr, i, j, color_type):
     # 判断(i, j)位置是否存活
     '''
@@ -139,7 +135,7 @@ def near_none(go_arr, i, j, BOARD_SIZE):
 
 def next_on_board(i, j, direction, BOARD_SIZE):
     '''
-    :param direction: w--up, a--left, s--down, d--right
+    :param direction: 'w'--up, 'a'--left, 's'--down, 'd'--right
     :reurn: is on the board or not
     '''
     if direction == "w":
@@ -160,6 +156,7 @@ def next_on_board(i, j, direction, BOARD_SIZE):
 def go_judege(go_arr):
     # 判断是否符合规则
     '''
+    check whether fit the rule
     :param go_arr: the numpy array contains the chess board
     :return: whether this chess board fit the go rules in the document
              False => unfit rule
@@ -170,12 +167,10 @@ def go_judege(go_arr):
     return not white and not black
 
 
-# -------------------------------------------------------
-# User strategy  *need finish
-# -------------------------------------------------------
 def is_dead(go_arr, color_type):
     # 判断某种颜色是否有死棋
     '''
+    check the specific color is dead or not
     :param go_arr: the numpy array contains the chess board
     :param color_type: -1 is black, 1 is white.
     :return: whether this chess board fit the go rules in the document
@@ -203,6 +198,13 @@ def is_dead(go_arr, color_type):
 
 
 def which_dead(go_arr, color_type):
+    # 挑出该颜色的死棋
+    '''
+    find all the specific color chess which is dead
+    :param go_arr: the numpy array contains the chess board
+    :param color_type: -1 is black, 1 is white.
+    :return: the list of dead chess
+    '''
     has_dead = []
     color_pt = np.zeros(go_arr.shape)
     color_pt[:] = POINT_STATE_EMPYT
@@ -218,6 +220,12 @@ def which_dead(go_arr, color_type):
 
 
 def eat_dead(go_arr, color_type):
+    # 吃掉该颜色的死棋
+    '''
+    eat all the specific color chess which is dead
+    :param go_arr: the numpy array contains the chess board
+    :param color_type: -1 is black, 1 is white.
+    '''
     wait_del = []
     optional = np.zeros(go_arr.shape)
     tmp_indx = np.where(go_arr == color_type)
@@ -294,19 +302,21 @@ if __name__ == "__main__":
     # The first problem: rule checking
     problem_tag = "Problem 0: rule checking"
     go_arr = read_go('{}_0.txt'.format(file_tag))
-    fp.write('{}_0'.format(file_tag) + "\n")
     plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
     print("{}:{}".format(problem_tag, chess_rule_monitor))
+    # 0 ans
+    fp.write('{}_0'.format(file_tag) + "\n")
     fp.write(str(chess_rule_monitor) + "\n\n")
     plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
     problem_tag = "Problem 00: rule checking"
     go_arr = read_go('{}_00.txt'.format(file_tag))
-    fp.write('{}_00'.format(file_tag) + "\n")
     plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
     print("{}:{}".format(problem_tag, chess_rule_monitor))
+    ## 00ans
+    fp.write('{}_00'.format(file_tag) + "\n")
     fp.write(str(chess_rule_monitor) + "\n\n")
     plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
@@ -314,24 +324,26 @@ if __name__ == "__main__":
     for i in range(1, 5):
         problem_tag = "Problem {}: forward on step".format(i)
         go_arr = read_go('{}_{}.txt'.format(file_tag, i))
-        fp.write('{}_{}'.format(file_tag, i) + "\n")
         plot_go(go_arr, problem_tag)
         chess_rule_monitor = go_judege(go_arr)
         ans, user_arr = user_step_eat(go_arr)  # need finish
         print("{}:{}".format(problem_tag, ans))
+        ## ans
+        fp.write('{}_{}'.format(file_tag, i) + "\n")
         for point in ans:
             fp.write("{} {}\n".format(point[0], point[1]))
         fp.write("\n")
         plot_go(user_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
 
-    # The sixth problem: find all the postion which can place a white chess pieces
+    # The sixth problem: find all the position which can place a white chess pieces
     problem_tag = "Problem {}: all possible position".format(5)
     go_arr = read_go('{}_{}.txt'.format(file_tag, 5))
-    fp.write('{}_{}'.format(file_tag, 5) + "\n")
     plot_go(go_arr, problem_tag)
     chess_rule_monitor = go_judege(go_arr)
     ans = user_setp_possible(go_arr)  # need finish
     print("{}:{}".format(problem_tag, ans))
+    # 5ans
+    fp.write('{}_{}'.format(file_tag, 5) + "\n")
     for point in ans:
         fp.write("{} {}\n".format(point[0], point[1]))
     plot_go(go_arr, '{}=>{}'.format(problem_tag, chess_rule_monitor))
