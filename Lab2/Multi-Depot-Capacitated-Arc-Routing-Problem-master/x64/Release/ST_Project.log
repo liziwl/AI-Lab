@@ -1,0 +1,19 @@
+﻿  main.cpp
+c:\users\ktayal\documents\visual studio 2012\projects\st_project\st_project\ProblemSet.h(102): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(311) : see declaration of 'sscanf'
+c:\users\ktayal\documents\visual studio 2012\projects\st_project\st_project\ProblemSet.h(106): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(311) : see declaration of 'sscanf'
+c:\users\ktayal\documents\visual studio 2012\projects\st_project\st_project\ProblemSet.h(110): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(311) : see declaration of 'sscanf'
+c:\users\ktayal\documents\visual studio 2012\projects\st_project\st_project\ProblemSet.h(118): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(311) : see declaration of 'sscanf'
+c:\users\ktayal\documents\visual studio 2012\projects\st_project\st_project\ProblemSet.h(143): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+main.cpp(9): warning C4101: 'cur_numcols' : unreferenced local variable
+main.cpp(8): warning C4101: 'i' : unreferenced local variable
+main.cpp(9): warning C4101: 'cur_numrows' : unreferenced local variable
+main.cpp(8): warning C4101: 'j' : unreferenced local variable
+  Generating code
+c:\users\ktayal\documents\visual studio 2012\projects\st_project\st_project\model.h(31): warning C4715: 'getVariableIndex' : not all control paths return a value
+c:\users\ktayal\documents\visual studio 2012\projects\st_project\st_project\model.h(334): warning C4715: 'Build_model' : not all control paths return a value
+  Finished generating code
+  ST_Project.vcxproj -> c:\users\ktayal\documents\visual studio 2012\Projects\ST_Project\x64\Release\ST_Project.exe
