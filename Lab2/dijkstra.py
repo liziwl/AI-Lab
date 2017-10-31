@@ -9,7 +9,6 @@ class Dijkstra(object):
         self.vertexs = vertexs  # 邻接矩阵
         self.dist = {}  # 相聚起始点的距离
         self.unVisited = []  # 准备访问点
-        # self.visited = []  # 已经访问点
 
     def initUnVisited(self, start):
         self.dist.clear()
@@ -60,9 +59,9 @@ class Dijkstra(object):
 
 class Node(object):
     def __init__(self, nodeID):
-        self.nodeID = nodeID
-        self.prev = None
-        self.dist = sys.maxint
+        self.nodeID = nodeID # ID
+        self.prev = None # 前一个节点
+        self.dist = sys.maxint # 距离起始点的距离
 
     def __cmp__(self, other):
         if self.dist < other.dist:

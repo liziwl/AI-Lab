@@ -1,14 +1,14 @@
 # encoding: utf-8
 import re
+import dijkstra as dij
 
-
-# 修改列表为数字存储
 
 def readData(filename):
     # 0-7行，数据定义
     # 8行开始，数据本体
     f = open(filename, 'r')
-    Pattern = ["NAME : (.*)", "VERTICES : ([0-9]*)",
+    Pattern = ["NAME : (.*)",
+               "VERTICES : ([0-9]*)",
                "DEPOT : ([0-9]*)",
                "REQUIRED EDGES : ([0-9]*)",
                "NON-REQUIRED EDGES : ([0-9]*)",
@@ -23,9 +23,6 @@ def readData(filename):
             fData.append(re.findall(Pattern[count], it)[0])
             count += 1
         elif count <= 7:
-            # print count
-            # print it
-            # print re.findall(Pattern[count],it)
             fData.append(int(re.findall(Pattern[count], it)[0]))
             count += 1
         elif count == 8:
@@ -41,6 +38,7 @@ def readData(filename):
 
 
 def matrixTran(data):
+    # 转换为邻接矩阵
     vmap = {}
 
     for it in range(8, len(data)):
@@ -76,4 +74,7 @@ if __name__ == '__main__':
     print sample
 
     vmap = matrixTran(sample)
-    print vmap
+
+    test1 = dij.Dijkstra(vmap)
+    test1.printGraph()
+    print test1.search(19, 54)
