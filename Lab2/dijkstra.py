@@ -78,8 +78,20 @@ class Node(object):
     def setDist(self, dist):
         self.dist = dist
 
+    def str_withIndent(self, indent):
+        s1 = "<ID: {}>\n".format(self.nodeID)
+        if self.prev is not None:
+            s2 = "\t<prev: {}>\n".format(self.prev.str_withIndent(indent + 1))
+        else:
+            s2 = "<prev: None>\n"
+        s3 = "<distance: {}>".format(self.dist)
+        for i in range(0, indent):
+            s2 = "\t" + s2
+            s3 = "\t" + s3
+        return s1 + s2 + s3
+
     def __str__(self):
-        return "<ID: {}>\n<prev: {}>\n<distance: {}>".format(self.nodeID, self.prev, self.dist)
+        return self.str_withIndent(0)
 
     def __repr__(self):
         return str(self)
