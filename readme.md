@@ -15,3 +15,25 @@
 numpy additional materials：
 1. [Doc](https://docs.scipy.org/doc/numpy/genindex.html)
 2. [TutorialsPoint NumPy 教程](http://www.jianshu.com/p/57e3c0a92f3a)
+
+# Lab2 - Capacitated Arc Routing Problem (CARP)
+
+## Data Format
+
+> 1st line: NAME : <string> i.e., the name of the instance;
+>
+> 2nd line: VERTICES : <number> i.e., the number of vertices;
+>
+> 3rd line: DEPOT : <number>                          i.e., the depot vertex;
+>
+> 4th line: REQUIRED EDGES : <number>                 i.e., the number of required edges (tasks);
+>
+> 5th line: NON-REQUIRED EDGES : <number>             i.e., the number of non-required edges;
+>
+> 6th line: VEHICLES : <number>                       i.e., the number of vehicles;
+>
+> 7th line: CAPACITY : <number>                       i.e., the vehicle capacity;
+> 
+>8th line: TOTAL COST OF REQUIRED EDGES : <number>   i.e., the total cost of all tasks;
+>
+>9th line: NODES     COST    DEMAND
