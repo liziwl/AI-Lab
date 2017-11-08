@@ -10,7 +10,7 @@ class Dijkstra(object):
         self.vertexs = vertexs  # 邻接矩阵
         self.dist = {}  # 相聚起始点的距离
         self.unVisited = []  # 准备访问点
-        self.d = np.full((len(vertexs), len(vertexs)), sys.maxint)  # 两点之间的距离
+        self.d = np.full((len(vertexs) + 1, len(vertexs) + 1), sys.maxint)  # 两点之间的距离
 
     def initUnVisited(self, start):
         self.dist.clear()
@@ -108,7 +108,7 @@ class Node(object):
 
 
 if __name__ == '__main__':
-    sample = CARP.readData("CARP_samples\\egl-e1-A.dat")
+    sample = CARP.readData("CARP_samples\\gdb1.dat")
     print sample
 
     vmap = CARP.matrixTran(sample)
@@ -118,3 +118,4 @@ if __name__ == '__main__':
     # print test1.search(0, 5)
     test1.go_all()
     print test1.d
+    print  len(test1.d)

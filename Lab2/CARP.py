@@ -9,14 +9,14 @@ def readData(filename):
     # 0-7行，数据定义
     # 8行开始，数据本体
     f = open(filename, 'r')
-    Pattern = ["NAME : (.*)",
-               "VERTICES : ([0-9]*)",
-               "DEPOT : ([0-9]*)",
-               "REQUIRED EDGES : ([0-9]*)",
-               "NON-REQUIRED EDGES : ([0-9]*)",
-               "VEHICLES : ([0-9]*)",
-               "CAPACITY : ([0-9]*)",
-               "TOTAL COST OF REQUIRED EDGES : ([0-9]*)"]
+    Pattern = ["NAME : (.*)",  # Line 0
+               "VERTICES : ([0-9]*)",  # Line 1
+               "DEPOT : ([0-9]*)",  # Line 2
+               "REQUIRED EDGES : ([0-9]*)",  # Line 3
+               "NON-REQUIRED EDGES : ([0-9]*)",  # Line 4
+               "VEHICLES : ([0-9]*)",  # Line 5
+               "CAPACITY : ([0-9]*)",  # Line 6
+               "TOTAL COST OF REQUIRED EDGES : ([0-9]*)"]  # Line 7
     data = f.readlines()
     count = 0
     fData = []
@@ -68,7 +68,7 @@ def free_Set(data):
     free = []
     for it in range(8, len(data)):
         # print data[it]
-        if it[3] != 0:
+        if data[it][3] != 0:
             free.append(data[it])
     return free
 
@@ -86,7 +86,7 @@ def printGraph(graph):
         #     self.route_list[route_num].append(task)
 
 
-def better(u, u2, remain, rule):
+def better(u, uPrev, remain, rule):
     function = {
         1: rule1,
         # 2: rule2,
@@ -95,51 +95,66 @@ def better(u, u2, remain, rule):
         # 5: rule5
     }
     func = function[rule]
-    func(u, u2, remain)
+    func(u, uPrev, remain)
 
 
-def rule1(u, u2, remain):
-    rate1 = u[2] / (remain - u[3])
-    rate2 = u2[2] / (remain - u2[3])
+def rule1(u, uPrev, remain):
+    if uPrev is None:
+        return True
+
+    try:
+        rate1 = u[2] / (remain - u[3])
+    except:
+        rate1 = sys.maxint
+    try:
+        rate2 = uPrev[2] / (remain - uPrev[3])
+    except:
+        rate2 = sys.maxint
+
     if rate1 > rate2:
-        return rate1
+        return True
     else:
-        return rate2
+        return False
 
 
-def rule2(u, u2, remain):
+def rule2(u, uPrev, remain):
+    if uPrev is None:
+        return True
     rate1 = u[2] / (remain - u[3])
-    rate2 = u2[2] / (remain - u2[3])
+    rate2 = uPrev[2] / (remain - uPrev[3])
     if rate1 < rate2:
-        return rate1
+        return True
     else:
-        return rate2
+        return False
 
 
-def removeFree(free,edge):
+def removeFree(free, edge):
     index = -1
-    [start, end, cost, demand]=edge
-    for i in range(0,len(free)):
+    [start, end, cost, demand] = edge
+    for i in range(0, len(free)):
         [istart, iend, icost, idemand] = free[i]
-        if (istart==start and iend ==end) or (istart==end and iend ==start):
+        if (istart == start and iend == end) or (istart == end and iend == start):
             index = i
             break
     del free[index]
 
-def path_scanning(graph, distance,capacity):
+
+def path_scanning(graph, distance, capacity, ruleNum):
     '''
-    :param graph: 邻接矩阵
+    :param graph: 邻接表
     :param distance: Dijkstra对象中的每2个点之间的距离
     :param capacity: 容量
     :return:
     '''
+    print "capacity: {}".format(capacity)
     k = 0
     free = copy.deepcopy(graph)
+    rt = []
+    l = []  # load list
+    c = []  # cost list
     while True:
         k = k + 1
-        r = [] # route list
-        l = [] # load list
-        c = [] # cost list
+        r = []  # route list
         load = 0
         cost = 0
         remain = capacity
@@ -147,32 +162,63 @@ def path_scanning(graph, distance,capacity):
         while True:
             dist = sys.maxint
             edge = None
-            for it in free | load + it[3] < capacity:
+            for it in free:
                 # it格式 [a,b,c,d] a起点 0，b终点 1，c COST 2，d DEMAND 3
-                [istart,iend,icost,idemand] =it
-                # 正面
-                if distance[i][istart] <dist:
-                    dist = distance[i][istart]
-                    edge = it
-                elif dist == distance[i][istart] and better(it,edge,remain,1):
-                    edge =it
-                # 反面
-                if distance[i][iend] <dist:
-                    dist = distance[i][iend]
-                    edge = [iend,istart,icost,idemand]
-                elif dist == distance[i][iend] and better(it,edge,remain,1):
-                    edge = [iend, istart, icost, idemand]
-            r.append(edge)
-            removeFree(free,edge)
-            free.remove(it)
-            load = load + idemand
-            cost = cost + dist + icost
-            i = iend
+                [istart, iend, icost, idemand] = it
+                if load + idemand <= capacity:
+                    # 正面
+                    if distance[i][istart] < dist:
+                        dist = distance[i][istart]
+                        edge = it
+                    elif dist == distance[i][istart] and better(it, edge, remain, ruleNum):
+                        edge = it
+                    # 反面
+                    if distance[i][iend] < dist:
+                        dist = distance[i][iend]
+                        edge = [iend, istart, icost, idemand]
+                    elif dist == distance[i][iend] and better(it, edge, remain, ruleNum):
+                        edge = [iend, istart, icost, idemand]
+                else:
+                    continue
+            # end for
+            if edge is not None:
+                [istart, iend, icost, idemand] = edge
+                r.append(edge)
+                # print r
+                removeFree(free, edge)
+                load = load + idemand
+                remain = capacity - load
+                cost = cost + dist + icost
+                i = iend
+
             if len(free) == 0 or dist == sys.maxint:
                 break
-            cost = cost + dist[i][i]
+                # end in loop
+        cost = cost + distance[i][1]
+        l.append(load)
+        c.append(cost)
+        rt.append(r)
         if len(free) == 0:
             break
+            # end out loop
+    return rt
+
+
+def printRoute(route):
+    for i in range(0, len(route)):
+        cost = 0
+        demand = 0
+        print str(i) + ": ",
+        for j in range(0, len(route[i])):
+            cost += route[i][j][2]
+            demand += route[i][j][3]
+            print "({}, {})".format(route[i][j][0], route[i][j][1]),
+            # print route[i][j]
+
+            if j < len(route[i]) - 1:
+                print ",",
+            else:
+                print "\nCOST: {}, DEMAND: {}".format(cost, demand)
 
 
 class task:
@@ -185,20 +231,23 @@ class task:
 
 
 if __name__ == '__main__':
-    # print readData("CARP_samples\\egl-e1-A.dat")
-    # print readData("CARP_samples\\egl-s1-A.dat")
-    # print readData("CARP_samples\\gdb1.dat")
-    # print readData("CARP_samples\\gdb10.dat")
-    # print readData("CARP_samples\\val1A.dat")
-    # print readData("CARP_samples\\val4A.dat")
-    # print readData("CARP_samples\\val7A.dat")
+    sample = readData("CARP_samples\\egl-e1-A.dat")
+    # sample = readData("CARP_samples\\egl-s1-A.dat")
+    # sample = readData("CARP_samples\\gdb1.dat")
+    # sample = readData("CARP_samples\\gdb10.dat")
+    # sample = readData("CARP_samples\\val1A.dat")
+    # sample = readData("CARP_samples\\val4A.dat")
+    # sample = readData("CARP_samples\\val7A.dat")
 
-    sample = readData("CARP_samples\\gdb1.dat")
     print sample
 
-    graph = free_Set(sample)
-    # printGraph(graph)
-    # vmap = matrixTran(sample)
+    free = free_Set(sample)
+    print free
 
-    # test1 = dij.Dijkstra(vmap)
-    # test1.printGraph()
+    vmap = matrixTran(sample)
+    test1 = dij.Dijkstra(vmap)
+    test1.go_all()
+    # print test1.d
+    rt = path_scanning(free, test1.d, sample[6], 1)
+    # print rt
+    printRoute(rt)
