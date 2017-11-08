@@ -2,6 +2,7 @@
 import heapq
 import sys
 import CARP
+import numpy as np
 
 
 class Dijkstra(object):
@@ -9,6 +10,7 @@ class Dijkstra(object):
         self.vertexs = vertexs  # 邻接矩阵
         self.dist = {}  # 相聚起始点的距离
         self.unVisited = []  # 准备访问点
+        self.d = np.full((len(vertexs), len(vertexs)), sys.maxint)  # 两点之间的距离
 
     def initUnVisited(self, start):
         self.dist.clear()
@@ -48,6 +50,15 @@ class Dijkstra(object):
                 break
         heapq._siftdown(self.unVisited, 0, index)
 
+    def go_all(self):
+        # print "maxINT:" + str(sys.maxint)
+        for i in range(1, len(self.d)):
+            for j in range(1, len(self.d[i])):
+                temp = self.search(i, j)
+                if temp is not None:
+                    # print temp.dist
+                    self.d[i][j] = temp.dist
+
     def getNeighbors(self, nodeID):
         # 返回邻接字典
         return self.vertexs[nodeID]
@@ -59,9 +70,9 @@ class Dijkstra(object):
 
 class Node(object):
     def __init__(self, nodeID):
-        self.nodeID = nodeID # ID
-        self.prev = None # 前一个节点
-        self.dist = sys.maxint # 距离起始点的距离
+        self.nodeID = nodeID  # ID
+        self.prev = None  # 前一个节点
+        self.dist = sys.maxint  # 距离起始点的距离
 
     def __cmp__(self, other):
         if self.dist < other.dist:
@@ -104,4 +115,6 @@ if __name__ == '__main__':
 
     test1 = Dijkstra(vmap)
     test1.printGraph()
-    print test1.search(19, 54)
+    # print test1.search(0, 5)
+    test1.go_all()
+    print test1.d
