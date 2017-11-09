@@ -73,12 +73,12 @@ def free_Set(data):
     return free
 
 
-def better(u, uPrev, remain, distance, capacity, rule, isinv):
+def better(u, uPrev, remain, map_dij, capacity, rule, isinv):
     '''
     :param u: 当前边
     :param uPrev: 历史最优边
     :param remain: 车辆剩余容量
-    :param distance: 距离矩阵
+    :param map_dij: Dijkstra对象
     :param capacity: 车辆容量
     :param rule: 使用规则
     :param isinv: 是否将当前边反向比较
@@ -92,10 +92,10 @@ def better(u, uPrev, remain, distance, capacity, rule, isinv):
         5: rule5
     }
     func = function[rule]
-    return func(u, uPrev, remain, distance, capacity, isinv)
+    return func(u, uPrev, remain, map_dij, capacity, isinv)
 
 
-def rule1(u, uPrev, remain, distance, capacity, isinv):
+def rule1(u, uPrev, remain, map_dij, capacity, isinv):
     if uPrev is None:
         return True
 
@@ -114,7 +114,7 @@ def rule1(u, uPrev, remain, distance, capacity, isinv):
         return False
 
 
-def rule2(u, uPrev, remain, distance, capacity, isinv):
+def rule2(u, uPrev, remain, map_dij, capacity, isinv):
     if uPrev is None:
         return True
 
@@ -133,43 +133,43 @@ def rule2(u, uPrev, remain, distance, capacity, isinv):
         return False
 
 
-def rule3(u, uPrev, remain, distance, capacity, isinv):
+def rule3(u, uPrev, remain, map_dij, capacity, isinv):
     if uPrev is None:
         return True
     if isinv:
-        if distance[u[0]][1] > distance[uPrev[1]][1]:
+        if map_dij.get_dist(u[0], 1) > map_dij.get_dist(uPrev[1], 1):
             return True
         else:
             return False
     else:
-        if distance[u[1]][1] > distance[uPrev[1]][1]:
+        if map_dij.get_dist(u[1], 1) > map_dij.get_dist(uPrev[1], 1):
             return True
         else:
             return False
 
 
-def rule4(u, uPrev, remain, distance, capacity, isinv):
+def rule4(u, uPrev, remain, map_dij, capacity, isinv):
     if uPrev is None:
         return True
     if isinv:
-        if distance[u[0]][1] < distance[uPrev[1]][1]:
+        if map_dij.get_dist(u[0], 1) < map_dij.get_dist(uPrev[1], 1):
             return True
         else:
             return False
     else:
-        if distance[u[1]][1] < distance[uPrev[1]][1]:
+        if map_dij.get_dist(u[1], 1) < map_dij.get_dist(uPrev[1], 1):
             return True
         else:
             return False
 
 
-def rule5(u, uPrev, remain, distance, capacity, isinv):
+def rule5(u, uPrev, remain, map_dij, capacity, isinv):
     if uPrev is None:
         return True
     if remain > capacity / 2:
-        return rule3(u, uPrev, remain, distance, capacity, isinv)
+        return rule3(u, uPrev, remain, map_dij, capacity, isinv)
     else:
-        return rule4(u, uPrev, remain, distance, capacity, isinv)
+        return rule4(u, uPrev, remain, map_dij, capacity, isinv)
 
 
 def removeFree(free, edge):
@@ -188,10 +188,10 @@ def removeFree(free, edge):
     del free[index]
 
 
-def path_scanning(graph, distance, capacity, ruleNum):
+def path_scanning(graph, map_dij, capacity, ruleNum):
     '''
     :param graph: 邻接表，每条边只存一次
-    :param distance: Dijkstra对象中的每2个点之间的距离
+    :param map_dij: Dijkstra对象
     :param capacity: 容量
     :param ruleNum: 使用的规则
     :return: 路径列表
@@ -216,16 +216,18 @@ def path_scanning(graph, distance, capacity, ruleNum):
                 [istart, iend, icost, idemand] = it
                 if load + idemand <= capacity:
                     # 正面
-                    if distance[i][istart] < dist:
-                        dist = distance[i][istart]
+                    if map_dij.get_dist(i, istart) < dist:
+                        dist = map_dij.get_dist(i, istart)
                         edge = it
-                    elif dist == distance[i][istart] and better(it, edge, remain, distance, capacity, ruleNum, False):
+                    elif dist == map_dij.get_dist(i, istart) and better(it, edge, remain, map_dij, capacity, ruleNum,
+                                                                        False):
                         edge = it
                     # 反面
-                    if distance[i][iend] < dist:
-                        dist = distance[i][iend]
+                    if map_dij.get_dist(i, iend) < dist:
+                        dist = map_dij.get_dist(i, iend)
                         edge = [iend, istart, icost, idemand]
-                    elif dist == distance[i][iend] and better(it, edge, remain, distance, capacity, ruleNum, True):
+                    elif dist == map_dij.get_dist(i, iend) and better(it, edge, remain, map_dij, capacity, ruleNum,
+                                                                      True):
                         edge = [iend, istart, icost, idemand]
                 else:
                     continue
@@ -243,14 +245,33 @@ def path_scanning(graph, distance, capacity, ruleNum):
             if len(free) == 0 or dist == sys.maxint:
                 break
                 # end in loop
-        cost = cost + distance[i][1]
+        cost = cost + map_dij.get_dist(i, 1)
         l.append(load)
         c.append(cost)
         rt.append(r)
         if len(free) == 0:
             break
             # end out loop
-    return rt
+    return rt, l, c
+
+
+def calc_cost(path, map_dij):
+    total_cost = 0
+    total_demand = 0
+    for i in range(0, len(path)):
+        cost = 0
+        demand = 0
+        prev = 1
+        for j in range(0, len(path[i])):
+            [istart, iend, icost, idemand] = path[i][j]
+            cost = cost + icost + map_dij.get_dist(prev, istart)
+            prev = iend
+            demand += idemand
+        cost = cost + map_dij.get_dist(prev, 1)
+        print "{}: COST: {}, DEMAND: {}".format(i + 1, cost, demand)
+        total_cost += cost
+        total_demand += demand
+    print "Total COST: {}, Total DEMAND: {}".format(total_cost, total_demand)
 
 
 def printHead(sample):
@@ -264,7 +285,9 @@ def printHead(sample):
     print "TOTAL COST OF REQUIRED EDGES : {}".format(sample[7])  # Line 7
 
 
-def printRoute(route):
+def printRoute(route, vdij):
+    total_cost = 0
+    total_demand = 0
     for i in range(0, len(route)):
         cost = 0
         demand = 0
@@ -278,7 +301,12 @@ def printRoute(route):
             if j < len(route[i]) - 1:
                 print ",",
             else:
-                print "\nCOST: {}, DEMAND: {}".format(cost, demand)
+                print ""
+                # print "\nCOST: {}, DEMAND: {}".format(cost, demand)
+                total_cost += cost
+                total_demand += demand
+    # print "Total COST: {}, Total DEMAND: {}".format(total_cost, total_demand)
+    calc_cost(route, vdij)
 
 
 def printGraph(graph):
@@ -310,10 +338,13 @@ if __name__ == '__main__':
     free = free_Set(sample)
     print free
 
-    vmap = matrixTran(sample)
-    test1 = dij.Dijkstra(vmap)
-    test1.go_all()
+    vertex = matrixTran(sample)
+    vdij = dij.Dijkstra(vertex)
+    # vdij.go_all()
     # print test1.d
-    rt = path_scanning(free, test1.d, sample[6], 5)
-    # print rt
-    printRoute(rt)
+    for i in range(1, 6):
+        print "\nRule{}".format(i)
+        (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
+        printRoute(rt, vdij)
+        # print rt
+        # print "Route COST: {}".format(sum(cost))
