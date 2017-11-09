@@ -86,19 +86,19 @@ def printGraph(graph):
         #     self.route_list[route_num].append(task)
 
 
-def better(u, uPrev, remain, rule):
+def better(u, uPrev, remain, distance, capacity, rule, isinv):
     function = {
         1: rule1,
-        # 2: rule2,
-        # 3: rule3,
-        # 4: rule4,
-        # 5: rule5
+        2: rule2,
+        3: rule3,
+        4: rule4,
+        5: rule5
     }
     func = function[rule]
-    func(u, uPrev, remain)
+    return func(u, uPrev, remain, distance, capacity, isinv)
 
 
-def rule1(u, uPrev, remain):
+def rule1(u, uPrev, remain, distance, capacity, isinv):
     if uPrev is None:
         return True
 
@@ -117,15 +117,62 @@ def rule1(u, uPrev, remain):
         return False
 
 
-def rule2(u, uPrev, remain):
+def rule2(u, uPrev, remain, distance, capacity, isinv):
     if uPrev is None:
         return True
-    rate1 = u[2] / (remain - u[3])
-    rate2 = uPrev[2] / (remain - uPrev[3])
+
+    try:
+        rate1 = u[2] / (remain - u[3])
+    except:
+        rate1 = sys.maxint
+    try:
+        rate2 = uPrev[2] / (remain - uPrev[3])
+    except:
+        rate2 = sys.maxint
+
     if rate1 < rate2:
         return True
     else:
         return False
+
+
+def rule3(u, uPrev, remain, distance, capacity, isinv):
+    if uPrev is None:
+        return True
+    if isinv:
+        if distance[u[0]][1] > distance[uPrev[1]][1]:
+            return True
+        else:
+            return False
+    else:
+        if distance[u[1]][1] > distance[uPrev[1]][1]:
+            return True
+        else:
+            return False
+
+
+def rule4(u, uPrev, remain, distance, capacity, isinv):
+    if uPrev is None:
+        return True
+    if isinv:
+        if distance[u[0]][1] < distance[uPrev[1]][1]:
+            return True
+        else:
+            return False
+    else:
+        if distance[u[1]][1] < distance[uPrev[1]][1]:
+            return True
+        else:
+            return False
+
+
+def rule5(u, uPrev, remain, distance, capacity, isinv):
+    if uPrev is None:
+        return True
+    if remain > capacity / 2:
+        return rule3(u, uPrev, remain, distance, capacity, isinv)
+    else:
+        return rule4(u, uPrev, remain, distance, capacity, isinv)
 
 
 def removeFree(free, edge):
@@ -146,7 +193,6 @@ def path_scanning(graph, distance, capacity, ruleNum):
     :param capacity: 容量
     :return:
     '''
-    print "capacity: {}".format(capacity)
     k = 0
     free = copy.deepcopy(graph)
     rt = []
@@ -170,13 +216,13 @@ def path_scanning(graph, distance, capacity, ruleNum):
                     if distance[i][istart] < dist:
                         dist = distance[i][istart]
                         edge = it
-                    elif dist == distance[i][istart] and better(it, edge, remain, ruleNum):
+                    elif dist == distance[i][istart] and better(it, edge, remain, distance, capacity, ruleNum, False):
                         edge = it
                     # 反面
                     if distance[i][iend] < dist:
                         dist = distance[i][iend]
                         edge = [iend, istart, icost, idemand]
-                    elif dist == distance[i][iend] and better(it, edge, remain, ruleNum):
+                    elif dist == distance[i][iend] and better(it, edge, remain, distance, capacity, ruleNum, True):
                         edge = [iend, istart, icost, idemand]
                 else:
                     continue
@@ -204,11 +250,22 @@ def path_scanning(graph, distance, capacity, ruleNum):
     return rt
 
 
+def printHead(sample):
+    print "NAME : {}".format(sample[0])  # Line 0
+    print "VERTICES : {}".format(sample[1])  # Line 1
+    print "DEPOT : {}".format(sample[2])  # Line 2
+    print "REQUIRED EDGES : {}".format(sample[3])  # Line 3
+    print "NON-REQUIRED EDGES : {}".format(sample[4])  # Line 4
+    print "VEHICLES : {}".format(sample[5])  # Line 5
+    print "CAPACITY : {}".format(sample[6])  # Line 6
+    print "TOTAL COST OF REQUIRED EDGES : {}".format(sample[7])  # Line 7
+
+
 def printRoute(route):
     for i in range(0, len(route)):
         cost = 0
         demand = 0
-        print str(i) + ": ",
+        print str(i + 1) + ": ",
         for j in range(0, len(route[i])):
             cost += route[i][j][2]
             demand += route[i][j][3]
@@ -240,6 +297,7 @@ if __name__ == '__main__':
     # sample = readData("CARP_samples\\val7A.dat")
 
     print sample
+    printHead(sample)
 
     free = free_Set(sample)
     print free
@@ -248,6 +306,6 @@ if __name__ == '__main__':
     test1 = dij.Dijkstra(vmap)
     test1.go_all()
     # print test1.d
-    rt = path_scanning(free, test1.d, sample[6], 1)
+    rt = path_scanning(free, test1.d, sample[6],5)
     # print rt
     printRoute(rt)

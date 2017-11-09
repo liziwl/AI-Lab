@@ -53,11 +53,12 @@ class Dijkstra(object):
     def go_all(self):
         # print "maxINT:" + str(sys.maxint)
         for i in range(1, len(self.d)):
-            for j in range(1, len(self.d[i])):
+            for j in range(i, len(self.d[i])):
                 temp = self.search(i, j)
                 if temp is not None:
                     # print temp.dist
                     self.d[i][j] = temp.dist
+                    self.d[j][i] = temp.dist
 
     def getNeighbors(self, nodeID):
         # 返回邻接字典
@@ -118,4 +119,4 @@ if __name__ == '__main__':
     # print test1.search(0, 5)
     test1.go_all()
     print test1.d
-    print  len(test1.d)
+    print len(test1.d)
