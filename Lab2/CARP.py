@@ -40,7 +40,7 @@ def readData(filename):
 
 
 def matrixTran(data):
-    # 转换为邻接矩阵
+    # 转换为邻接矩阵，每条边正反都存
     vmap = {}
 
     for it in range(8, len(data)):
@@ -64,7 +64,7 @@ def matrixTran(data):
 
 
 def free_Set(data):
-    # 转换为邻接矩阵
+    # 转换为邻接矩阵，每条边只存一次
     free = []
     for it in range(8, len(data)):
         # print data[it]
@@ -73,20 +73,17 @@ def free_Set(data):
     return free
 
 
-# class route:
-#     def __init__(self,graph):
-#         self.route_list = []
-#         self.graph = graph
-
-def printGraph(graph):
-    for it in graph:
-        print it, graph.get(it)
-
-        # def append(self, route_num, task):
-        #     self.route_list[route_num].append(task)
-
-
 def better(u, uPrev, remain, distance, capacity, rule, isinv):
+    '''
+    :param u: 当前边
+    :param uPrev: 历史最优边
+    :param remain: 车辆剩余容量
+    :param distance: 距离矩阵
+    :param capacity: 车辆容量
+    :param rule: 使用规则
+    :param isinv: 是否将当前边反向比较
+    :return: bool型，是否更好
+    '''
     function = {
         1: rule1,
         2: rule2,
@@ -176,6 +173,11 @@ def rule5(u, uPrev, remain, distance, capacity, isinv):
 
 
 def removeFree(free, edge):
+    '''
+    :param free: 路径列表
+    :param edge: 需要移除的边
+    :return:
+    '''
     index = -1
     [start, end, cost, demand] = edge
     for i in range(0, len(free)):
@@ -188,10 +190,11 @@ def removeFree(free, edge):
 
 def path_scanning(graph, distance, capacity, ruleNum):
     '''
-    :param graph: 邻接表
+    :param graph: 邻接表，每条边只存一次
     :param distance: Dijkstra对象中的每2个点之间的距离
     :param capacity: 容量
-    :return:
+    :param ruleNum: 使用的规则
+    :return: 路径列表
     '''
     k = 0
     free = copy.deepcopy(graph)
@@ -278,6 +281,11 @@ def printRoute(route):
                 print "\nCOST: {}, DEMAND: {}".format(cost, demand)
 
 
+def printGraph(graph):
+    for it in graph:
+        print it, graph.get(it)
+
+
 class task:
     def __init__(self, id, start, end, cost, demand):
         self.id = id
@@ -288,8 +296,8 @@ class task:
 
 
 if __name__ == '__main__':
-    sample = readData("CARP_samples\\egl-e1-A.dat")
-    # sample = readData("CARP_samples\\egl-s1-A.dat")
+    # sample = readData("CARP_samples\\egl-e1-A.dat")
+    sample = readData("CARP_samples\\egl-s1-A.dat")
     # sample = readData("CARP_samples\\gdb1.dat")
     # sample = readData("CARP_samples\\gdb10.dat")
     # sample = readData("CARP_samples\\val1A.dat")
@@ -306,6 +314,6 @@ if __name__ == '__main__':
     test1 = dij.Dijkstra(vmap)
     test1.go_all()
     # print test1.d
-    rt = path_scanning(free, test1.d, sample[6],5)
+    rt = path_scanning(free, test1.d, sample[6], 5)
     # print rt
     printRoute(rt)

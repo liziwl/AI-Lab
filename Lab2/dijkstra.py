@@ -4,7 +4,9 @@ import sys
 import CARP
 import numpy as np
 
+
 # 优化性能，运行时计算 or 提前算好查表
+# 如果 REQUIRED EDGES 为 vertex的 1.2 倍或者以上时候，就是点较少的时候，采用提前查表，否则采用运行时计算
 class Dijkstra(object):
     def __init__(self, vertexs):
         self.vertexs = vertexs  # 邻接矩阵
