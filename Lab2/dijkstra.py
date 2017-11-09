@@ -4,7 +4,7 @@ import sys
 import CARP
 import numpy as np
 
-
+# 优化性能，运行时计算 or 提前算好查表
 class Dijkstra(object):
     def __init__(self, vertexs):
         self.vertexs = vertexs  # 邻接矩阵
@@ -109,7 +109,7 @@ class Node(object):
 
 
 if __name__ == '__main__':
-    sample = CARP.readData("CARP_samples\\gdb1.dat")
+    sample = CARP.readData("CARP_samples\\egl-s1-A.dat")
     print sample
 
     vmap = CARP.matrixTran(sample)
