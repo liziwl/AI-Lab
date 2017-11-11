@@ -3,6 +3,7 @@ import re
 import dijkstra as dij
 import copy
 import sys
+import random
 
 
 def readData(filename):
@@ -314,19 +315,80 @@ def printGraph(graph):
         print it, graph.get(it)
 
 
-class task:
-    def __init__(self, id, start, end, cost, demand):
-        self.id = id
-        self.start = start
-        self.end = end
-        self.cost = cost
-        self.demand = demand
+class routing(object):
+    def __init__(self, path):
+        self.path = path
+        self.total_cost = sys.maxint
+        self.total_demand = sys.maxint
+        self.cost = []
+        self.demand = []
+
+    def calc_cost(self, map_dij):
+        self.cost = []
+        self.demand = []
+        self.total_cost = 0
+        self.total_demand = 0
+        for i in range(0, len(self.path)):
+            Tcost = 0
+            Tdemand = 0
+            prev = 1
+            for j in range(0, len(self.path[i])):
+                [istart, iend, icost, idemand] = self.path[i][j]
+                Tcost = Tcost + icost + map_dij.get_dist(prev, istart)
+                prev = iend
+                # demand += idemand
+            Tcost = Tcost + map_dij.get_dist(prev, 1)
+            self.cost.append(Tcost)
+            self.demand.append(Tdemand)
+            self.total_cost += Tcost
+            self.total_demand += Tdemand
+
+    def mutation_single(self):
+        muta = []
+        route_index = random.randint(0, len(self.path) - 1)
+        for i in range(0, len(self.path)):
+            new_route = copy.deepcopy(self.path[i])
+            if i == route_index:
+                # print "route:{}".format(route_index)
+                edge_index = random.randint(0, len(new_route) - 1)
+                # print "len:{}, index:{}".format(len(new_route), edge_index)
+                edge = new_route[edge_index]
+                new_route.remove(edge)
+                inset = random.randint(0, len(new_route))
+                new_route.insert(inset, edge)
+            muta.append(new_route)
+        return muta
+
+    def mutation_double(self):
+        muta1 = []
+        muta2 = []
+        route_index = random.randint(0, len(self.path) - 1)
+        for i in range(0, len(self.path)):
+            new_route1 = copy.deepcopy(self.path[i])
+            new_route2 = copy.deepcopy(self.path[i])
+            if i == route_index:
+                # print "route:{}".format(route_index)
+                edge_index = random.randint(0, len(new_route1) - 1)
+                # print "len:{}, index:{}".format(len(new_route), edge_index)
+
+                edge = new_route1[edge_index]
+                [istart, iend, icost, idemand] = edge
+                inv_edge = [iend, istart, icost, idemand]
+
+                new_route1.remove(edge)
+                new_route2.remove(edge)
+                inset = random.randint(0, len(new_route1))
+                new_route1.insert(inset, edge)
+                new_route2.insert(inset, inv_edge)
+            muta1.append(new_route1)
+            muta2.append(new_route2)
+        return muta1, muta2
 
 
 if __name__ == '__main__':
     # sample = readData("CARP_samples\\egl-e1-A.dat")
-    sample = readData("CARP_samples\\egl-s1-A.dat")
-    # sample = readData("CARP_samples\\gdb1.dat")
+    # sample = readData("CARP_samples\\egl-s1-A.dat")
+    sample = readData("CARP_samples\\gdb1.dat")
     # sample = readData("CARP_samples\\gdb10.dat")
     # sample = readData("CARP_samples\\val1A.dat")
     # sample = readData("CARP_samples\\val4A.dat")
@@ -340,11 +402,20 @@ if __name__ == '__main__':
 
     vertex = matrixTran(sample)
     vdij = dij.Dijkstra(vertex)
-    # vdij.go_all()
-    # print test1.d
-    for i in range(1, 6):
-        print "\nRule{}".format(i)
-        (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
-        printRoute(rt, vdij)
-        # print rt
-        # print "Route COST: {}".format(sum(cost))
+    # # vdij.go_all()
+    # # print test1.d
+    # for i in range(1, 6):
+    #     print "\nRule{}".format(i)
+    #     (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
+    #     printRoute(rt, vdij)
+    #     # print rt
+    #     # print "Route COST: {}".format(sum(cost))
+
+    (rt, load, cost) = path_scanning(free, vdij, sample[6], 1)
+    a = routing(rt)
+    a.calc_cost(vdij)
+    print a.total_cost
+
+    b = routing(a.mutation_single())
+    b.calc_cost(vdij)
+    print b.total_cost

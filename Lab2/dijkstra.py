@@ -7,7 +7,7 @@ import numpy as np
 
 # 优化性能，运行时计算 or 提前算好查表
 # 如果 REQUIRED EDGES 为 vertex的 1.2 倍或者以上时候，就是点较少的时候，采用提前查表，否则采用运行时计算
-# 改变d的生成方法，改成第一次使用的时候调用，然后储存结果，不一次性全部生成结果。
+# 最后决定的生成方法，改成第一次使用的时候调用，然后储存结果，不一次性全部生成结果。
 class Dijkstra(object):
     def __init__(self, vertexs):
         self.vertexs = vertexs  # 邻接矩阵
