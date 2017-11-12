@@ -4,6 +4,7 @@ import dijkstra as dij
 import copy
 import sys
 import random
+import time
 
 
 def readData(filename):
@@ -357,7 +358,7 @@ class routing(object):
                 inset = random.randint(0, len(new_route))
                 new_route.insert(inset, edge)
             muta.append(new_route)
-        return muta
+        return (muta,)
 
     def mutation_double(self):
         muta1 = []
@@ -372,8 +373,8 @@ class routing(object):
                 # print "len:{}, index:{}".format(len(new_route), edge_index)
 
                 edge = new_route1[edge_index]
-                [istart, iend, icost, idemand] = edge
-                inv_edge = [iend, istart, icost, idemand]
+                inv_edge = invedge(edge)
+                # print edge
 
                 new_route1.remove(edge)
                 new_route2.remove(edge)
@@ -384,12 +385,48 @@ class routing(object):
             muta2.append(new_route2)
         return muta1, muta2
 
+    def mutation_swap(self):
+        x1 = random.randint(0, len(self.path) - 1)
+        y1 = random.randint(0, len(self.path[x1]) - 1)
+        it1 = self.path[x1][y1]
+        # print it1
+
+        x2 = random.randint(0, len(self.path) - 1)
+        y2 = random.randint(0, len(self.path[x2]) - 1)
+        it2 = self.path[x2][y2]
+        # print it2
+
+        new_route1 = copy.deepcopy(self.path)
+        new_route2 = copy.deepcopy(self.path)
+        new_route3 = copy.deepcopy(self.path)
+        new_route4 = copy.deepcopy(self.path)
+
+        for i in range(0, len(new_route1)):
+            if x1 == i:
+                new_route1[x1][y1] = it2
+                new_route2[x1][y1] = invedge(it2)
+                new_route3[x1][y1] = invedge(it2)
+                new_route4[x1][y1] = it2
+            if x2 == i:
+                new_route1[x2][y2] = it1
+                new_route2[x2][y2] = invedge(it1)
+                new_route3[x2][y2] = it1
+                new_route4[x2][y2] = invedge(it1)
+        return new_route1, new_route2, new_route3, new_route4
+
+
+def invedge(edge):
+    [istart, iend, icost, idemand] = edge
+    return [iend, istart, icost, idemand]
+
 
 if __name__ == '__main__':
+    start = time.time()
+
     # sample = readData("CARP_samples\\egl-e1-A.dat")
     # sample = readData("CARP_samples\\egl-s1-A.dat")
-    sample = readData("CARP_samples\\gdb1.dat")
-    # sample = readData("CARP_samples\\gdb10.dat")
+    # sample = readData("CARP_samples\\gdb1.dat")
+    sample = readData("CARP_samples\\gdb10.dat")
     # sample = readData("CARP_samples\\val1A.dat")
     # sample = readData("CARP_samples\\val4A.dat")
     # sample = readData("CARP_samples\\val7A.dat")
@@ -403,7 +440,7 @@ if __name__ == '__main__':
     vertex = matrixTran(sample)
     vdij = dij.Dijkstra(vertex)
     # # vdij.go_all()
-    # # print test1.d
+
     # for i in range(1, 6):
     #     print "\nRule{}".format(i)
     #     (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
@@ -411,11 +448,22 @@ if __name__ == '__main__':
     #     # print rt
     #     # print "Route COST: {}".format(sum(cost))
 
-    (rt, load, cost) = path_scanning(free, vdij, sample[6], 1)
+    (rt, load, cost) = path_scanning(free, vdij, sample[6], 3)
     a = routing(rt)
     a.calc_cost(vdij)
     print a.total_cost
 
-    b = routing(a.mutation_single())
-    b.calc_cost(vdij)
-    print b.total_cost
+    flag = True
+    while flag:
+        out_list = a.mutation_double()
+        for rout in out_list:
+            temp = routing(rout)
+            temp.calc_cost(vdij)
+            print temp.total_cost
+            print temp.path
+            if temp.total_cost < a.total_cost:
+                flag = False
+                break
+
+    run_time = (time.time() - start)
+    print "\nTIME: {}s".format(run_time)
