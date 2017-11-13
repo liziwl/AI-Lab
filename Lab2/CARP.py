@@ -318,6 +318,7 @@ def print_graph(graph):
 
 
 class Routing(object):
+    # TODO 增加路径规则检查
     def __init__(self, path):
         self.path = path
         self.total_cost = sys.maxint
@@ -455,7 +456,7 @@ class Routing(object):
             new_route1[route_index][sub2 + sub1 - i] = invedge(temp[i])
         return (new_route1,)
 
-    # TODO fix bug
+    # FIXME 数组越界
     def mutation_2opt_inter(self):
         new_route1 = []
         new_route2 = []
