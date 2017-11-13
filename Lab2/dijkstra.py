@@ -9,16 +9,16 @@ import numpy as np
 # 如果 REQUIRED EDGES 为 vertex的 1.2 倍或者以上时候，就是点较少的时候，采用提前查表，否则采用运行时计算
 # 最后决定的生成方法，改成第一次使用的时候调用，然后储存结果，不一次性全部生成结果。
 class Dijkstra(object):
-    def __init__(self, vertexs):
-        self.vertexs = vertexs  # 邻接矩阵
+    def __init__(self, vertices):
+        self.vertices = vertices  # 邻接矩阵
         self.dist = {}  # 相聚起始点的距离
         self.unVisited = []  # 准备访问点
-        self.d = np.full((len(vertexs) + 1, len(vertexs) + 1), sys.maxint)  # 两点之间的距离
+        self.d = np.full((len(vertices) + 1, len(vertices) + 1), sys.maxint)  # 两点之间的距离
 
     def init_unvisited(self, start):
         self.dist.clear()
         self.unVisited = []  # 清空历史数据
-        for v in self.vertexs:
+        for v in self.vertices:
             temp = Node(v)
             if temp.nodeID == start:
                 temp.set_dist(0)
@@ -43,10 +43,10 @@ class Dijkstra(object):
                     self.update_node(top, neighbor, alt)
         return None
 
-    def update_node(self, current, nextID, dist):
+    def update_node(self, current, next_id, dist):
         index = 0
         for i in range(0, len(self.unVisited)):
-            if self.unVisited[i].nodeID == nextID:
+            if self.unVisited[i].nodeID == next_id:
                 self.unVisited[i].set_prev(current)
                 self.unVisited[i].set_dist(dist)
                 index = i
@@ -75,18 +75,18 @@ class Dijkstra(object):
             else:
                 return sys.maxint
 
-    def get_neighbors(self, nodeID):
+    def get_neighbors(self, node_id):
         # 返回邻接字典
-        return self.vertexs[nodeID]
+        return self.vertices[node_id]
 
     def print_graph(self):
-        for it in self.vertexs:
-            print it, self.vertexs.get(it)
+        for it in self.vertices:
+            print it, self.vertices.get(it)
 
 
 class Node(object):
-    def __init__(self, nodeID):
-        self.nodeID = nodeID  # ID
+    def __init__(self, node_id):
+        self.nodeID = node_id  # ID
         self.prev = None  # 前一个节点
         self.dist = sys.maxint  # 距离起始点的距离
 

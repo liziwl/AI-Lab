@@ -325,6 +325,17 @@ class Routing(object):
         self.cost = []
         self.demand = []
 
+    def __str__(self):
+        return str(self.path) + "\n" + "Total COST: {}, Total DEMAND: {}".format(self.total_cost, self.total_demand)
+
+    def __cmp__(self, other):
+        if self.total_cost < other.total_cost:
+            return -1
+        elif self.total_cost > other.total_cost:
+            return 1
+        else:
+            return 0
+
     def calc_cost(self, map_dij):
         self.cost = []
         self.demand = []
@@ -335,6 +346,7 @@ class Routing(object):
             Tdemand = 0
             prev = 1
             for j in range(0, len(self.path[i])):
+                print self.path[i][j]
                 [istart, iend, icost, idemand] = self.path[i][j]
                 Tcost = Tcost + icost + map_dij.get_dist(prev, istart)
                 prev = iend
@@ -344,6 +356,21 @@ class Routing(object):
             self.demand.append(Tdemand)
             self.total_cost += Tcost
             self.total_demand += Tdemand
+
+    def mutation(self, rule_num):
+        """
+        :param rule_num: 使用的变异规则
+        :return: 变异后的路线元组
+        """
+        function = {
+            1: self.mutation_single,
+            2: self.mutation_double,
+            3: self.mutation_swap,
+            4: self.mutation_2opt,
+            5: self.mutation_2opt_inter
+        }
+        func = function[rule_num]
+        return func()
 
     def mutation_single(self):
         muta = []
@@ -416,12 +443,94 @@ class Routing(object):
         return new_route1, new_route2, new_route3, new_route4
 
     def mutation_2opt(self):
-        pass
+        new_route1 = copy.deepcopy(self.path)
+        route_index = random.randint(0, len(self.path) - 1)
+        sub1 = random.randint(0, len(self.path[route_index]) - 1)
+        sub2 = random.randint(0, len(self.path[route_index]) - 1)
+        if sub1 > sub2:
+            sub1, sub2 = sub2, sub1
+
+        temp = copy.deepcopy(new_route1[route_index])
+        for i in range(sub1, sub2 + 1)[::-1]:
+            new_route1[route_index][sub2 + sub1 - i] = invedge(temp[i])
+        return (new_route1,)
+
+    # TODO fix bug
+    def mutation_2opt_inter(self):
+        new_route1 = []
+        new_route2 = []
+
+        route_index1 = random.randint(0, len(self.path) - 1)
+        route_index2 = random.randint(0, len(self.path) - 1)
+
+        sub1 = random.randint(0, len(self.path[route_index1]) - 1)
+        sub2 = random.randint(0, len(self.path[route_index2]) - 1)
+
+        for i in range(0, len(self.path)):
+            if i != route_index1 and i != route_index2:
+                new_route1.append(copy.deepcopy(self.path[i]))
+                new_route2.append(copy.deepcopy(self.path[i]))
+
+        tmp = copy.deepcopy(self.path[route_index1][0:sub1])
+        tmp.append(copy.deepcopy(self.path[route_index2][sub2:]))
+        new_route1.append(tmp)
+
+        tmp = copy.deepcopy(self.path[route_index2][0:sub2])
+        tmp.append(copy.deepcopy(self.path[route_index1][sub1:]))
+        new_route1.append(tmp)
+
+        tmp = copy.deepcopy(self.path[route_index1][0:sub1])
+        tmp.append(reverse_edges(self.path[route_index2][0:sub2]))
+        new_route2.append(tmp)
+
+        tmp = reverse_edges(self.path[route_index1][sub1:])
+        tmp.append(copy.deepcopy(self.path[route_index2][sub2:]))
+        new_route2.append(tmp)
+        return new_route1, new_route2
 
 
 def invedge(edge):
     [istart, iend, icost, idemand] = edge
     return [iend, istart, icost, idemand]
+
+
+def reverse_edges(edges):
+    tmp = copy.deepcopy(edges)
+    tmp = tmp[::-1]
+    for i in range(0, len(tmp)):
+        tmp[i] = invedge(tmp[i])
+    return tmp
+
+
+class Population:
+    def __init__(self, select_size, generate_size, dist_map):
+        self.select_size = select_size
+        self.generate_size = generate_size
+        self.routing_list = []
+        self.dist_map = dist_map
+
+    def add_route(self, route):
+        self.routing_list.append(route)
+
+    def generate(self, rule_num):
+        link = []
+        counter = self.generate_size
+        while counter > 0:
+            index = random.randint(0, len(self.routing_list) - 1)
+            muta = self.routing_list[index].mutation(rule_num)
+            for rout in muta:
+                temp = Routing(rout)
+                temp.calc_cost(self.dist_map)
+                link.append(temp)
+                counter = counter - 1
+
+    def select(self):
+        self.routing_list.sort()
+        self.routing_list = self.routing_list[0:self.select_size]
+
+    def the_best(self):
+        self.routing_list.sort()
+        return self.routing_list[0]
 
 
 if __name__ == '__main__':
@@ -445,29 +554,42 @@ if __name__ == '__main__':
     vdij = dij.Dijkstra(vertex)
     # # vdij.go_all()
 
-    # for i in range(1, 6):
-    #     print "\nRule{}".format(i)
-    #     (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
-    #     print_route(rt, vdij)
-    #     # print rt
-    #     # print "Route COST: {}".format(sum(cost))
+    group = Population(100, 300, vdij)
 
-    (rt, load, cost) = path_scanning(free, vdij, sample[6], 3)
-    a = Routing(rt)
-    a.calc_cost(vdij)
-    print a.total_cost
+    for i in range(1, 6):
+        print "\nRule{}".format(i)
+        (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
+        print_route(rt, vdij)
 
-    flag = True
-    while flag:
-        out_list = a.mutation_double()
-        for rout in out_list:
-            temp = Routing(rout)
-            temp.calc_cost(vdij)
-            print temp.total_cost
-            print temp.path
-            if temp.total_cost < a.total_cost:
-                flag = False
-                break
+        a = Routing(rt)
+        a.calc_cost(vdij)
+        group.add_route(a)
+        # print rt
+        # print "Route COST: {}".format(sum(cost))
+
+    # (rt, load, cost) = path_scanning(free, vdij, sample[6], 3)
+
+    # print a.total_cost
+
+    # flag = True
+    # while flag:
+    #     out_list = a.mutation_2opt()
+    #     for rout in out_list:
+    #         temp = Routing(rout)
+    #         temp.calc_cost(vdij)
+    #
+    #         print temp.path
+    #         print "old: {}, new: {}".format(a.total_cost, temp.total_cost)
+    #         if select(a, temp) == 1:
+    #             flag = False
+    #             print "better"
+    #             break
+
+    run_time = (time.time() - start)
+    while run_time < 60:
+        group.generate(5)
+        group.select()
+        print group.the_best()
 
     run_time = (time.time() - start)
     print "\nTIME: {}s".format(run_time)
