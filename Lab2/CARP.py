@@ -7,7 +7,7 @@ import random
 import time
 
 
-def readData(filename):
+def read_data(filename):
     # 0-7行，数据定义
     # 8行开始，数据本体
     f = open(filename, 'r')
@@ -41,7 +41,7 @@ def readData(filename):
     return fData
 
 
-def matrixTran(data):
+def matrix_tran(data):
     # 转换为邻接矩阵，每条边正反都存
     vmap = {}
 
@@ -65,7 +65,7 @@ def matrixTran(data):
     return vmap
 
 
-def free_Set(data):
+def free_set(data):
     # 转换为邻接矩阵，每条边只存一次
     free = []
     for it in range(8, len(data)):
@@ -76,7 +76,7 @@ def free_Set(data):
 
 
 def better(u, uPrev, remain, map_dij, capacity, rule, isinv):
-    '''
+    """
     :param u: 当前边
     :param uPrev: 历史最优边
     :param remain: 车辆剩余容量
@@ -85,7 +85,7 @@ def better(u, uPrev, remain, map_dij, capacity, rule, isinv):
     :param rule: 使用规则
     :param isinv: 是否将当前边反向比较
     :return: bool型，是否更好
-    '''
+    """
     function = {
         1: rule1,
         2: rule2,
@@ -105,6 +105,7 @@ def rule1(u, uPrev, remain, map_dij, capacity, isinv):
         rate1 = u[2] / (remain - u[3])
     except:
         rate1 = sys.maxint
+
     try:
         rate2 = uPrev[2] / (remain - uPrev[3])
     except:
@@ -174,12 +175,12 @@ def rule5(u, uPrev, remain, map_dij, capacity, isinv):
         return rule4(u, uPrev, remain, map_dij, capacity, isinv)
 
 
-def removeFree(free, edge):
-    '''
+def remove_free(free, edge):
+    """
     :param free: 路径列表
     :param edge: 需要移除的边
     :return:
-    '''
+    """
     index = -1
     [start, end, cost, demand] = edge
     for i in range(0, len(free)):
@@ -191,13 +192,13 @@ def removeFree(free, edge):
 
 
 def path_scanning(graph, map_dij, capacity, ruleNum):
-    '''
+    """
     :param graph: 邻接表，每条边只存一次
     :param map_dij: Dijkstra对象
     :param capacity: 容量
     :param ruleNum: 使用的规则
     :return: 路径列表
-    '''
+    """
     k = 0
     free = copy.deepcopy(graph)
     rt = []
@@ -238,7 +239,7 @@ def path_scanning(graph, map_dij, capacity, ruleNum):
                 [istart, iend, icost, idemand] = edge
                 r.append(edge)
                 # print r
-                removeFree(free, edge)
+                remove_free(free, edge)
                 load = load + idemand
                 remain = capacity - load
                 cost = cost + dist + icost
@@ -276,7 +277,7 @@ def calc_cost(path, map_dij):
     print "Total COST: {}, Total DEMAND: {}".format(total_cost, total_demand)
 
 
-def printHead(sample):
+def print_head(sample):
     print "NAME : {}".format(sample[0])  # Line 0
     print "VERTICES : {}".format(sample[1])  # Line 1
     print "DEPOT : {}".format(sample[2])  # Line 2
@@ -287,7 +288,7 @@ def printHead(sample):
     print "TOTAL COST OF REQUIRED EDGES : {}".format(sample[7])  # Line 7
 
 
-def printRoute(route, vdij):
+def print_route(route, vdij):
     total_cost = 0
     total_demand = 0
     for i in range(0, len(route)):
@@ -311,12 +312,12 @@ def printRoute(route, vdij):
     calc_cost(route, vdij)
 
 
-def printGraph(graph):
+def print_graph(graph):
     for it in graph:
         print it, graph.get(it)
 
 
-class routing(object):
+class Routing(object):
     def __init__(self, path):
         self.path = path
         self.total_cost = sys.maxint
@@ -414,6 +415,9 @@ class routing(object):
                 new_route4[x2][y2] = invedge(it1)
         return new_route1, new_route2, new_route3, new_route4
 
+    def mutation_2opt(self):
+        pass
+
 
 def invedge(edge):
     [istart, iend, icost, idemand] = edge
@@ -423,33 +427,33 @@ def invedge(edge):
 if __name__ == '__main__':
     start = time.time()
 
-    # sample = readData("CARP_samples\\egl-e1-A.dat")
-    # sample = readData("CARP_samples\\egl-s1-A.dat")
-    # sample = readData("CARP_samples\\gdb1.dat")
-    sample = readData("CARP_samples\\gdb10.dat")
-    # sample = readData("CARP_samples\\val1A.dat")
-    # sample = readData("CARP_samples\\val4A.dat")
-    # sample = readData("CARP_samples\\val7A.dat")
+    # sample = read_data("CARP_samples\\egl-e1-A.dat")
+    # sample = read_data("CARP_samples\\egl-s1-A.dat")
+    # sample = read_data("CARP_samples\\gdb1.dat")
+    sample = read_data("CARP_samples\\gdb10.dat")
+    # sample = read_data("CARP_samples\\val1A.dat")
+    # sample = read_data("CARP_samples\\val4A.dat")
+    # sample = read_data("CARP_samples\\val7A.dat")
 
     print sample
-    printHead(sample)
+    print_head(sample)
 
-    free = free_Set(sample)
+    free = free_set(sample)
     print free
 
-    vertex = matrixTran(sample)
+    vertex = matrix_tran(sample)
     vdij = dij.Dijkstra(vertex)
     # # vdij.go_all()
 
     # for i in range(1, 6):
     #     print "\nRule{}".format(i)
     #     (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
-    #     printRoute(rt, vdij)
+    #     print_route(rt, vdij)
     #     # print rt
     #     # print "Route COST: {}".format(sum(cost))
 
     (rt, load, cost) = path_scanning(free, vdij, sample[6], 3)
-    a = routing(rt)
+    a = Routing(rt)
     a.calc_cost(vdij)
     print a.total_cost
 
@@ -457,7 +461,7 @@ if __name__ == '__main__':
     while flag:
         out_list = a.mutation_double()
         for rout in out_list:
-            temp = routing(rout)
+            temp = Routing(rout)
             temp.calc_cost(vdij)
             print temp.total_cost
             print temp.path
