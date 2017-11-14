@@ -5,9 +5,11 @@ import copy
 import sys
 import random
 import time
+
+
 # TODO 命令行参数
 # TODO 并行化
-
+# TODO 改变边的存储方式，其实每条边不需要深度复制，只是每条边的顺序 和 方向需要深度复制
 def read_data(filename):
     # 0-7行，数据定义
     # 8行开始，数据本体
