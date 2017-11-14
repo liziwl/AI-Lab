@@ -5,7 +5,8 @@ import copy
 import sys
 import random
 import time
-
+# TODO 命令行参数
+# TODO 并行化
 
 def read_data(filename):
     # 0-7行，数据定义
@@ -576,9 +577,9 @@ if __name__ == '__main__':
     start = time.time()
 
     # sample = read_data("CARP_samples\\egl-e1-A.dat")
-    # sample = read_data("CARP_samples\\egl-s1-A.dat")
+    sample = read_data("CARP_samples\\egl-s1-A.dat")
     # sample = read_data("CARP_samples\\gdb1.dat")
-    sample = read_data("CARP_samples\\gdb10.dat")
+    # sample = read_data("CARP_samples\\gdb10.dat")
     # sample = read_data("CARP_samples\\val1A.dat")
     # sample = read_data("CARP_samples\\val4A.dat")
     # sample = read_data("CARP_samples\\val7A.dat")
