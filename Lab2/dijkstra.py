@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
     test1 = Dijkstra(vmap)
     test1.print_graph()
-    # print test1.search(0, 5)
-    test1.go_all()
-    print test1.d
-    print len(test1.d)
+    print test1.search(1, 11)
+    # test1.go_all()
+    # print test1.d
+    # print len(test1.d)
