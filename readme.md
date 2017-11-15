@@ -42,9 +42,13 @@ numpy additional materials：
 
 1. Using Regular expression to read data and store them in format
 2. Path scanning[1] generates initial solution.
-![image](https://github.com/liziwl/AI-Lab/blob/master/Lab2/picture/path_scanning.JPG?raw=true)
-The `better()` function is using the following rules:
-![image](https://github.com/liziwl/AI-Lab/blob/master/Lab2/picture/rule.JPG?raw=true)
+
+    ![image](https://github.com/liziwl/AI-Lab/blob/master/Lab2/picture/path_scanning.JPG?raw=true)
+
+    The `better()` function is using the following rules:
+
+    ![image](https://github.com/liziwl/AI-Lab/blob/master/Lab2/picture/rule.JPG?raw=true)
+
 3. Mutation[2] reproduct new generation.
 
 ### Reference
