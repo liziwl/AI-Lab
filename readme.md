@@ -20,20 +20,31 @@ numpy additional materials：
 
 ## Data Format
 
-> 1st line: NAME : <string> i.e., the name of the instance;
->
-> 2nd line: VERTICES : <number> i.e., the number of vertices;
->
-> 3rd line: DEPOT : <number>                          i.e., the depot vertex;
->
-> 4th line: REQUIRED EDGES : <number>                 i.e., the number of required edges (tasks);
->
-> 5th line: NON-REQUIRED EDGES : <number>             i.e., the number of non-required edges;
->
-> 6th line: VEHICLES : <number>                       i.e., the number of vehicles;
->
-> 7th line: CAPACITY : <number>                       i.e., the vehicle capacity;
-> 
->8th line: TOTAL COST OF REQUIRED EDGES : <number>   i.e., the total cost of all tasks;
->
->9th line: NODES     COST    DEMAND
+1st line: NAME : \<string> i.e., the name of the instance;
+
+2nd line: VERTICES : \<number> i.e., the number of vertices;
+
+3rd line: DEPOT : \<number>        i.e., the depot vertex;
+
+4th line: REQUIRED EDGES : \<number>    i.e., the number of required edges (tasks);
+
+5th line: NON-REQUIRED EDGES : \<number>      i.e., the number of non-required edges;
+
+6th line: VEHICLES : \<number>      i.e., the number of vehicles;
+
+7th line: CAPACITY : \<number>     i.e., the vehicle capacity;
+
+8th line: TOTAL COST OF REQUIRED EDGES : \<number>   i.e., the total cost of all tasks;
+
+9th line: NODES    COST    DEMAND
+
+## Implement Path
+
+1. Using Regular expression to read data and store them in format
+2. Path scanning[1] generates initial solution.
+3. Mutation[2] reproduct new generation.
+
+### Reference
+[1] A. C. C. Corberán and G. Laporte, *Arc routing: problems, methods*, and applications. Philadelphia: Society for Industrial and Applied Mathematics, 2014.
+
+[2] K. Tang, Y. Mei, and X. Yao, “Memetic algorithm with extended neighborhood search for capacitated arc routing problems,” *IEEE Transactions on Evolutionary Computation*, vol. 13, no. 5, pp. 1151–1166, 2009.
