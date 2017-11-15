@@ -42,6 +42,9 @@ numpy additional materials：
 
 1. Using Regular expression to read data and store them in format
 2. Path scanning[1] generates initial solution.
+![image](AI-Lab/Lab2/picture/path_scanning.JPG)
+The `better()` function is using the following rules:
+![image](AI-Lab/Lab2/picture/rule.JPG)
 3. Mutation[2] reproduct new generation.
 
 ### Reference
