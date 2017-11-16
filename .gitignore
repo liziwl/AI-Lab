@@ -1,4 +1,11 @@
 *.pyc
 
-#IDE metadata
+# IDE metadata
 .idea/
+
+# TEX files
+*.aux
+*.log
+*.out
+*.gz
+*.tex
