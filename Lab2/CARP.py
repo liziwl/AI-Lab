@@ -10,6 +10,7 @@ import time
 # TODO 命令行参数
 # TODO 并行化
 # TODO 改变边的存储方式，其实每条边不需要深度复制，只是每条边的顺序 和 方向需要深度复制
+# TODO 改成边的字典引用貌似可行
 def read_data(filename):
     # 0-7行，数据定义
     # 8行开始，数据本体
@@ -579,7 +580,7 @@ if __name__ == '__main__':
     start = time.time()
 
     # sample = read_data("CARP_samples\\egl-e1-A.dat")
-    sample = read_data("CARP_samples\\egl-s1-A.dat")
+    sample = read_data("CARP_samples\\egl-s1-.dat")
     # sample = read_data("CARP_samples\\gdb1.dat")
     # sample = read_data("CARP_samples\\gdb10.dat")
     # sample = read_data("CARP_samples\\val1A.dat")

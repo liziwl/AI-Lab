@@ -55,3 +55,5 @@ numpy additional materials：
 [1] A. C. C. Corberán and G. Laporte, *Arc routing: problems, methods*, and applications. Philadelphia: Society for Industrial and Applied Mathematics, 2014.
 
 [2] K. Tang, Y. Mei, and X. Yao, “Memetic algorithm with extended neighborhood search for capacitated arc routing problems,” *IEEE Transactions on Evolutionary Computation*, vol. 13, no. 5, pp. 1151–1166, 2009.
+
+3. [Benchmarks of Vector Packing Problem](http://logistik.bwl.uni-mainz.de/benchmarks.php)
