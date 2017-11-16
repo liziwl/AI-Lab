@@ -580,7 +580,7 @@ if __name__ == '__main__':
     start = time.time()
 
     # sample = read_data("CARP_samples\\egl-e1-A.dat")
-    sample = read_data("CARP_samples\\egl-s1-.dat")
+    sample = read_data("CARP_samples\\egl-s1-A.dat")
     # sample = read_data("CARP_samples\\gdb1.dat")
     # sample = read_data("CARP_samples\\gdb10.dat")
     # sample = read_data("CARP_samples\\val1A.dat")
