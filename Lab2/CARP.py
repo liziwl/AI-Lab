@@ -344,7 +344,7 @@ class Routing(object):
             return 0
 
     def check(self):
-        if len(cost) > self.vehicles:
+        if len(self.cost) > self.vehicles:
             self.obey_rule = False
             return self.obey_rule
 
@@ -544,6 +544,17 @@ class Population:
         self.routing_list = []
         self.dist_map = dist_map
 
+    def initial(self, edge_set, vertex_dij, vehicles, capacity):
+        for i in range(1, 6):
+            print "Rule{}".format(i)
+            (rt, load, cost) = path_scanning(free, vertex_dij, capacity, i)
+            print_route(rt, vertex_dij)
+
+            temp = Routing(rt, vehicles, capacity)
+            temp.calc_cost(vertex_dij)
+            self.add_route(temp)
+            print ""
+
     def add_route(self, route):
         if route.check():
             self.routing_list.append(route)
@@ -587,6 +598,9 @@ if __name__ == '__main__':
     # sample = read_data("CARP_samples\\val4A.dat")
     # sample = read_data("CARP_samples\\val7A.dat")
 
+    vehicles = sample[5]
+    capacity = sample[6]
+
     print sample
     print_head(sample)
 
@@ -594,29 +608,17 @@ if __name__ == '__main__':
     print free
 
     vertex = matrix_tran(sample)
-    vdij = dij.Dijkstra(vertex)
-    # vdij.go_all()
+    vertex_dij = dij.Dijkstra(vertex)
 
-    group = Population(100, 400, vdij)
-
-    for i in range(1, 6):
-        print "Rule{}".format(i)
-        (rt, load, cost) = path_scanning(free, vdij, sample[6], i)
-        print_route(rt, vdij)
-
-        a = Routing(rt, sample[5], sample[6])
-        a.calc_cost(vdij)
-        group.add_route(a)
-        print ""
-
+    group = Population(100, 400, vertex_dij)
+    group.initial(free, vertex_dij, vehicles, capacity)
     group.select()
     group.top_best(3)
 
     for i in range(0, 1000):
         print "\nLOOP: {}".format(i + 1)
         rule_num = random.randint(1, 5)
-        # rule_num = 3
-        group.generate(rule_num, sample[5], sample[6])
+        group.generate(rule_num, vehicles, capacity)
         group.select()
         group.top_best(5)
         run_time = (time.time() - start)

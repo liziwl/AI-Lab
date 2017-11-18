@@ -1,4 +1,6 @@
-# AI
+# Artificial intelligence
+CS303 of SUSTech
+
 ## Lab1 - go
 示例文件共有7个（train_0.txt, train_00.txt, train_1.txt ~ train_5.txt），其中每个示例文件存放一个围棋残局，存放格式为“行数 列数 颜色”，-1表示⿊色，1表示白色，
 ### 要求

@@ -4,9 +4,13 @@ import sys
 import getopt
 import os
 import re
+import CARP
+import time
+import dijkstra as dij
+import random
 
 
-def main(argv):
+def command_line_reader(argv):
     try:
         if len(argv) != 5:
             raise getopt.GetoptError("The argument count should be 5, and now is {}.".format(len(argv)))
@@ -29,9 +33,7 @@ def main(argv):
                 else:
                     seed = arg
 
-        print file_name
-        print 'termination: ', termination
-        print 'seed: ', seed
+        return file_name, termination, seed
 
     except getopt.GetoptError as err:
         print str(err)
@@ -48,4 +50,8 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    file_name, termination, seed = command_line_reader(sys.argv[1:])
+    print 'file name: ', file_name
+    print 'termination: ', termination
+    print 'seed: ', seed
+
