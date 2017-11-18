@@ -9,3 +9,6 @@
 *.out
 *.gz
 *.tex
+
+*.doc
+*.docx
