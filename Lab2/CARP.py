@@ -7,8 +7,9 @@ import random
 import time
 
 
-# TODO 命令行参数
 # TODO 并行化
+# TODO Augment-merge，split 算法
+# TODO Order Crossover genetic algorithm 改进变异算法
 # TODO 改变边的存储方式，其实每条边不需要深度复制，只是每条边的顺序 和 方向需要深度复制
 # TODO 改成边的字典引用貌似可行
 def read_data(filename):
@@ -298,7 +299,7 @@ def print_route(route, vdij):
     for i in range(0, len(route)):
         cost = 0
         demand = 0
-        print str(i + 1) + ": ",
+        print str(i + 1) + ":",
         for j in range(0, len(route[i])):
             cost += route[i][j][2]
             demand += route[i][j][3]
@@ -547,7 +548,7 @@ class Population:
     def initial(self, edge_set, vertex_dij, vehicles, capacity):
         for i in range(1, 6):
             print "Rule{}".format(i)
-            (rt, load, cost) = path_scanning(free, vertex_dij, capacity, i)
+            (rt, load, cost) = path_scanning(edge_set, vertex_dij, capacity, i)
             print_route(rt, vertex_dij)
 
             temp = Routing(rt, vehicles, capacity)
@@ -580,26 +581,35 @@ class Population:
     def top_best(self, num):
         self.routing_list.sort()
         if num < len(self.routing_list):
-            count = num + 1
+            count = num
         else:
             count = len(self.routing_list)
         for i in range(0, count):
             print "Top:{}\n".format(i + 1) + str(self.routing_list[i])
 
+    def print_result(self):
+        self.select()
+        best = self.routing_list[0]
+        path = best.path
+        str_path = "s "
+        for i in range(0, len(path)):
+            str_path += "0,"
+            for j in range(0, len(path[i])):
+                str_path += "({},{}),".format(path[i][j][0], path[i][j][1])
+            if i == len(path) - 1:
+                str_path += "0"
+            else:
+                str_path += "0,"
+        print str_path
+        print "q {}".format(best.total_cost)
 
-if __name__ == '__main__':
+
+def search_CARP(file_name, limited_time, ram_seed):
     start = time.time()
-
-    # sample = read_data("CARP_samples\\egl-e1-A.dat")
-    sample = read_data("CARP_samples\\egl-s1-A.dat")
-    # sample = read_data("CARP_samples\\gdb1.dat")
-    # sample = read_data("CARP_samples\\gdb10.dat")
-    # sample = read_data("CARP_samples\\val1A.dat")
-    # sample = read_data("CARP_samples\\val4A.dat")
-    # sample = read_data("CARP_samples\\val7A.dat")
-
+    sample = read_data(file_name)
     vehicles = sample[5]
     capacity = sample[6]
+    random.seed(ram_seed)
 
     print sample
     print_head(sample)
@@ -614,15 +624,23 @@ if __name__ == '__main__':
     group.initial(free, vertex_dij, vehicles, capacity)
     group.select()
     group.top_best(3)
+    run_time = (time.time() - start)
+    count = 1
 
-    for i in range(0, 1000):
-        print "\nLOOP: {}".format(i + 1)
+    while run_time <= limited_time:
+        print "\nLOOP: {}".format(count)
         rule_num = random.randint(1, 5)
         group.generate(rule_num, vehicles, capacity)
         group.select()
         group.top_best(5)
         run_time = (time.time() - start)
-        print "LOOP: {} TIME: {}s".format(i + 1, run_time)
+        print "LOOP: {} TIME: {}s".format(count, run_time)
+        count += 1
 
     run_time = (time.time() - start)
     print "\nTIME: {}s".format(run_time)
+    group.print_result()
+
+
+if __name__ == '__main__':
+    search_CARP("CARP_samples\\egl-e1-A.dat", 20, None)

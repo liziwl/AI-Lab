@@ -6,8 +6,6 @@ import os
 import re
 import CARP
 import time
-import dijkstra as dij
-import random
 
 
 def command_line_reader(argv):
@@ -54,4 +52,5 @@ if __name__ == "__main__":
     print 'file name: ', file_name
     print 'termination: ', termination
     print 'seed: ', seed
-
+    seed = 386817356579
+    CARP.search_CARP(file_name, termination, seed)
