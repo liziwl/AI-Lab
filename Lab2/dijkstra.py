@@ -63,6 +63,12 @@ class Dijkstra(object):
                     self.d[i][j] = temp.dist
                     self.d[j][i] = temp.dist
 
+    def get_cost(self,i,j):
+        return self.vertices.get(i).get(j)[0]
+
+    def get_demand(self,i,j):
+        return self.vertices.get(i).get(j)[1]
+
     def get_dist(self, i, j):
         if self.d[i][j] != sys.maxint:
             return self.d[i][j]
@@ -131,7 +137,9 @@ if __name__ == '__main__':
 
     test1 = Dijkstra(vmap)
     test1.print_graph()
-    print test1.search(1, 11)
+    print test1.get_cost(140,49)
+    print test1.get_demand(135,134)
+    # print test1.search(1, 11)
     # test1.go_all()
     # print test1.d
     # print len(test1.d)

@@ -8,13 +8,19 @@ import time
 
 
 # TODO 并行化
+# TODO 减少edge的后两个参数，改成查表
 # TODO Augment-merge，split 算法
 # TODO Order Crossover genetic algorithm 改进变异算法
 # TODO 改变边的存储方式，其实每条边不需要深度复制，只是每条边的顺序 和 方向需要深度复制
 # TODO 改成边的字典引用貌似可行
 def read_data(filename):
-    # 0-7行，数据定义
-    # 8行开始，数据本体
+    """
+    读取文件
+    0-7行，数据定义
+    8行开始，数据本体
+    :param filename: 文件名
+    :return: 数据列表
+    """
     f = open(filename, 'r')
     Pattern = ["NAME : (.*)",  # Line 0
                "VERTICES : ([0-9]*)",  # Line 1
@@ -46,8 +52,23 @@ def read_data(filename):
     return fData
 
 
+def print_head(sample):
+    print "NAME : {}".format(sample[0])  # Line 0
+    print "VERTICES : {}".format(sample[1])  # Line 1
+    print "DEPOT : {}".format(sample[2])  # Line 2
+    print "REQUIRED EDGES : {}".format(sample[3])  # Line 3
+    print "NON-REQUIRED EDGES : {}".format(sample[4])  # Line 4
+    print "VEHICLES : {}".format(sample[5])  # Line 5
+    print "CAPACITY : {}".format(sample[6])  # Line 6
+    print "TOTAL COST OF REQUIRED EDGES : {}".format(sample[7])  # Line 7
+
+
 def matrix_tran(data):
-    # 转换为邻接矩阵，每条边正反都存
+    """
+    将源数据转换为邻接矩阵，每条边正反都存
+    :param data: 源数据
+    :return: 邻接矩阵
+    """
     vmap = {}
 
     for it in range(8, len(data)):
@@ -70,8 +91,12 @@ def matrix_tran(data):
     return vmap
 
 
-def free_set(data):
-    # 转换为邻接矩阵，每条边只存一次
+def free_edge_set(data):
+    """
+    取出所有有需求的边，每条边只存一次
+    :param data: 源数据
+    :return: 邻接矩阵
+    """
     free = []
     for it in range(8, len(data)):
         # print data[it]
@@ -196,12 +221,12 @@ def remove_free(free, edge):
     del free[index]
 
 
-def path_scanning(graph, map_dij, capacity, ruleNum):
+def path_scanning(graph, map_dij, capacity, rule_num):
     """
     :param graph: 邻接表，每条边只存一次
     :param map_dij: Dijkstra对象
     :param capacity: 容量
-    :param ruleNum: 使用的规则
+    :param rule_num: 使用的规则
     :return: 路径列表
     """
     k = 0
@@ -227,14 +252,14 @@ def path_scanning(graph, map_dij, capacity, ruleNum):
                     if map_dij.get_dist(i, istart) < dist:
                         dist = map_dij.get_dist(i, istart)
                         edge = it
-                    elif dist == map_dij.get_dist(i, istart) and better(it, edge, remain, map_dij, capacity, ruleNum,
+                    elif dist == map_dij.get_dist(i, istart) and better(it, edge, remain, map_dij, capacity, rule_num,
                                                                         False):
                         edge = it
                     # 反面
                     if map_dij.get_dist(i, iend) < dist:
                         dist = map_dij.get_dist(i, iend)
                         edge = [iend, istart, icost, idemand]
-                    elif dist == map_dij.get_dist(i, iend) and better(it, edge, remain, map_dij, capacity, ruleNum,
+                    elif dist == map_dij.get_dist(i, iend) and better(it, edge, remain, map_dij, capacity, rule_num,
                                                                       True):
                         edge = [iend, istart, icost, idemand]
                 else:
@@ -263,65 +288,6 @@ def path_scanning(graph, map_dij, capacity, ruleNum):
     return rt, l, c
 
 
-def calc_cost(path, map_dij):
-    total_cost = 0
-    total_demand = 0
-    for i in range(0, len(path)):
-        cost = 0
-        demand = 0
-        prev = 1
-        for j in range(0, len(path[i])):
-            [istart, iend, icost, idemand] = path[i][j]
-            cost = cost + icost + map_dij.get_dist(prev, istart)
-            prev = iend
-            demand += idemand
-        cost = cost + map_dij.get_dist(prev, 1)
-        print "{}: COST: {}, DEMAND: {}".format(i + 1, cost, demand)
-        total_cost += cost
-        total_demand += demand
-    print "Total COST: {}, Total DEMAND: {}".format(total_cost, total_demand)
-
-
-def print_head(sample):
-    print "NAME : {}".format(sample[0])  # Line 0
-    print "VERTICES : {}".format(sample[1])  # Line 1
-    print "DEPOT : {}".format(sample[2])  # Line 2
-    print "REQUIRED EDGES : {}".format(sample[3])  # Line 3
-    print "NON-REQUIRED EDGES : {}".format(sample[4])  # Line 4
-    print "VEHICLES : {}".format(sample[5])  # Line 5
-    print "CAPACITY : {}".format(sample[6])  # Line 6
-    print "TOTAL COST OF REQUIRED EDGES : {}".format(sample[7])  # Line 7
-
-
-def print_route(route, vdij):
-    total_cost = 0
-    total_demand = 0
-    for i in range(0, len(route)):
-        cost = 0
-        demand = 0
-        print str(i + 1) + ":",
-        for j in range(0, len(route[i])):
-            cost += route[i][j][2]
-            demand += route[i][j][3]
-            print "({}, {})".format(route[i][j][0], route[i][j][1]),
-            # print route[i][j]
-
-            if j < len(route[i]) - 1:
-                print ",",
-            else:
-                print ""
-                # print "\nCOST: {}, DEMAND: {}".format(cost, demand)
-                total_cost += cost
-                total_demand += demand
-    # print "Total COST: {}, Total DEMAND: {}".format(total_cost, total_demand)
-    calc_cost(route, vdij)
-
-
-def print_graph(graph):
-    for it in graph:
-        print it, graph.get(it)
-
-
 class Routing(object):
     def __init__(self, path, vehicles, capacity):
         self.path = path
@@ -343,6 +309,18 @@ class Routing(object):
             return 1
         else:
             return 0
+
+    def print_route(self, vdij):
+        self.calc_cost(vdij)
+        for i in range(0, len(self.path)):
+            line = str(i + 1) + ": "
+            for j in range(0, len(self.path[i])):
+                line += "({}, {})".format(self.path[i][j][0], self.path[i][j][1])
+
+                if j < len(self.path[i]) - 1:
+                    line += ", "
+            print line
+        print "Total COST: {}, Total DEMAND: {}".format(self.total_cost, self.total_demand)
 
     def check(self):
         if len(self.cost) > self.vehicles:
@@ -369,9 +347,9 @@ class Routing(object):
             for j in range(0, len(self.path[i])):
                 # print self.path[i][j]
                 # print self.path
-                [istart, iend, icost, idemand] = self.path[i][j]
-                Tcost = Tcost + icost + map_dij.get_dist(prev, istart)
-                Tdemand = Tdemand + idemand
+                [istart, iend] = self.path[i][j]
+                Tcost = Tcost + map_dij.get_cost(istart, iend) + map_dij.get_dist(prev, istart)
+                Tdemand = Tdemand + map_dij.get_demand(istart, iend)
                 prev = iend
             Tcost = Tcost + map_dij.get_dist(prev, 1)
             self.cost.append(Tcost)
@@ -525,8 +503,8 @@ class Routing(object):
 
 
 def invedge(edge):
-    [istart, iend, icost, idemand] = edge
-    return [iend, istart, icost, idemand]
+    [istart, iend] = edge
+    return [iend, istart]
 
 
 def reverse_edges(edges):
@@ -537,22 +515,40 @@ def reverse_edges(edges):
     return tmp
 
 
+def simplify_edge(route):
+    rt = []
+    for i in range(0, len(route)):
+        line = []
+        for j in range(0, len(route[i])):
+            line.append([route[i][j][0], route[i][j][1]])
+        rt.append(line)
+    return rt
+
+
 class Population:
     # TODO 减少deepcopy引用
     def __init__(self, select_size, generate_size, dist_map):
+        """
+        初始化
+        :param select_size: 筛选总群大小
+        :param generate_size: 变异大小
+        :param dist_map: dijkstra对象
+        """
         self.select_size = select_size
         self.generate_size = generate_size
         self.routing_list = []
         self.dist_map = dist_map
 
     def initial(self, edge_set, vertex_dij, vehicles, capacity):
+        print "\nInitial Route:"
         for i in range(1, 6):
             print "Rule{}".format(i)
             (rt, load, cost) = path_scanning(edge_set, vertex_dij, capacity, i)
-            print_route(rt, vertex_dij)
+            s_rt = simplify_edge(rt)
 
-            temp = Routing(rt, vehicles, capacity)
+            temp = Routing(s_rt, vehicles, capacity)
             temp.calc_cost(vertex_dij)
+            temp.print_route(vertex_dij)
             self.add_route(temp)
             print ""
 
@@ -561,6 +557,13 @@ class Population:
             self.routing_list.append(route)
 
     def generate(self, rule_num, vehicles, capacity):
+        """
+        产生新总群
+        :param rule_num: 变异规则
+        :param vehicles: 车辆数
+        :param capacity: 车辆容量
+        :return: None，增加备选列表
+        """
         link = []
         counter = self.generate_size
         while counter > 0:
@@ -605,6 +608,12 @@ class Population:
 
 
 def search_CARP(file_name, limited_time, ram_seed):
+    """
+    :param file_name: 文件名
+    :param limited_time: 限制时间
+    :param ram_seed: 随机种子
+    :return: None，标准打印
+    """
     start = time.time()
     sample = read_data(file_name)
     vehicles = sample[5]
@@ -614,11 +623,12 @@ def search_CARP(file_name, limited_time, ram_seed):
     print sample
     print_head(sample)
 
-    free = free_set(sample)
-    print free
+    free = free_edge_set(sample)
+    # print free
 
     vertex = matrix_tran(sample)
     vertex_dij = dij.Dijkstra(vertex)
+    # vertex_dij.print_graph()
 
     group = Population(100, 400, vertex_dij)
     group.initial(free, vertex_dij, vehicles, capacity)
@@ -643,4 +653,4 @@ def search_CARP(file_name, limited_time, ram_seed):
 
 
 if __name__ == '__main__':
-    search_CARP("CARP_samples\\egl-e1-A.dat", 20, None)
+    search_CARP("CARP_samples\\egl-s1-A.dat", 60, None)
