@@ -7,12 +7,19 @@ import random
 import time
 
 
-# TODO 并行化
+# TODO 下降速率画图
+# TODO 中间某步重新生成路径（path scanning）
+# TODO 统计那种变异方法最有效
+# TODO 随机使用rule
+
+
 # TODO 减少edge的后两个参数，改成查表
 # TODO Augment-merge，split 算法
 # TODO Order Crossover genetic algorithm 改进变异算法
 # TODO 改变边的存储方式，其实每条边不需要深度复制，只是每条边的顺序 和 方向需要深度复制
 # TODO 改成边的字典引用貌似可行
+
+# TODO 并行化
 def read_data(filename):
     """
     读取文件
@@ -226,16 +233,17 @@ def path_scanning(graph, map_dij, capacity, rule_num):
     :param graph: 邻接表，每条边只存一次
     :param map_dij: Dijkstra对象
     :param capacity: 容量
-    :param rule_num: 使用的规则
+    :param rule_num: 使用的规则，如果在[1, 5] 范围内就一直使用此规则，不然随机使用规则。
     :return: 路径列表
     """
-    k = 0
+    out_of_index = rule_num < 0 or rule_num > 5
+    # k = 0
     free = copy.deepcopy(graph)
     rt = []
     l = []  # load list
     c = []  # cost list
     while True:
-        k = k + 1
+        # k = k + 1
         r = []  # route list
         load = 0
         cost = 0
@@ -247,6 +255,8 @@ def path_scanning(graph, map_dij, capacity, rule_num):
             for it in free:
                 # it格式 [a,b,c,d] a起点 0，b终点 1，c COST 2，d DEMAND 3
                 [istart, iend, icost, idemand] = it
+                if out_of_index:
+                    rule_num = random.randint(1, 5)
                 if load + idemand <= capacity:
                     # 正面
                     if map_dij.get_dist(i, istart) < dist:
@@ -323,13 +333,15 @@ class Routing(object):
         print "Total COST: {}, Total DEMAND: {}".format(self.total_cost, self.total_demand)
 
     def check(self):
-        if len(self.cost) > self.vehicles:
-            self.obey_rule = False
-            return self.obey_rule
+        # if len(self.cost) > self.vehicles:
+        #     self.obey_rule = False
+        #     print "more cars"
+        #     return self.obey_rule
 
         for d in self.demand:
             if d > self.capacity:
                 self.obey_rule = False
+                # print "more demand"
                 return self.obey_rule
 
         self.obey_rule = True
@@ -417,47 +429,28 @@ class Routing(object):
     def mutation_swap(self):
         x1 = random.randint(0, len(self.path) - 1)
         y1 = random.randint(0, len(self.path[x1]) - 1)
-        it1 = self.path[x1][y1]  # 交换边1
+        it1 = self.path[x1][y1]
 
         x2 = random.randint(0, len(self.path) - 1)
         y2 = random.randint(0, len(self.path[x2]) - 1)
-        it2 = self.path[x2][y2]  # 交换边2
+        it2 = self.path[x2][y2]
 
-        origin_copy = copy.deepcopy(self.path)
-        new_route1 = []
-        new_route2 = []
-        new_route3 = []
-        new_route4 = []
+        new_route1 = copy.deepcopy(self.path)
+        new_route2 = copy.deepcopy(self.path)
+        new_route3 = copy.deepcopy(self.path)
+        new_route4 = copy.deepcopy(self.path)
 
-        for i in range(0, len(self.path)):
-            if i != x1 and i != x2:
-                new_route1.append(origin_copy[i])
-                new_route2.append(origin_copy[i])
-                new_route3.append(origin_copy[i])
-                new_route4.append(origin_copy[i])
-            else:
-                if x1 == i:
-                    ori_tmp = origin_copy[i]
-                    rout = copy.deepcopy(ori_tmp)
-                    rout[y1] = it2
-                    inv_rout = copy.deepcopy(ori_tmp)
-                    inv_rout[y1] = invedge(it2)
-
-                    new_route1.append(rout)
-                    new_route2.append(inv_rout)
-                    new_route3.append(inv_rout)
-                    new_route4.append(rout)
-                if x2 == i:
-                    ori_tmp = origin_copy[i]
-                    rout = copy.deepcopy(ori_tmp)
-                    rout[y2] = it1
-                    inv_rout = copy.deepcopy(ori_tmp)
-                    inv_rout[y2] = invedge(it1)
-
-                    new_route1.append(rout)
-                    new_route2.append(inv_rout)
-                    new_route3.append(rout)
-                    new_route4.append(inv_rout)
+        for i in range(0, len(new_route1)):
+            if x1 == i:
+                new_route1[x1][y1] = it2
+                new_route2[x1][y1] = invedge(it2)
+                new_route3[x1][y1] = invedge(it2)
+                new_route4[x1][y1] = it2
+            if x2 == i:
+                new_route1[x2][y2] = it1
+                new_route2[x2][y2] = invedge(it1)
+                new_route3[x2][y2] = it1
+                new_route4[x2][y2] = invedge(it1)
         return new_route1, new_route2, new_route3, new_route4
 
     def mutation_2opt(self):
@@ -471,6 +464,7 @@ class Routing(object):
         temp = copy.deepcopy(new_route1[route_index])
         for i in range(sub1, sub2 + 1)[::-1]:
             new_route1[route_index][sub2 + sub1 - i] = invedge(temp[i])
+
         return (new_route1,)
 
     def mutation_2opt_inter(self):
@@ -479,6 +473,9 @@ class Routing(object):
 
         route_index1 = random.randint(0, len(self.path) - 1)
         route_index2 = random.randint(0, len(self.path) - 1)
+        while route_index1 == route_index2:
+            route_index1 = random.randint(0, len(self.path) - 1)
+            route_index2 = random.randint(0, len(self.path) - 1)
 
         sub1 = random.randint(0, len(self.path[route_index1]) - 1)
         sub2 = random.randint(0, len(self.path[route_index2]) - 1)
@@ -488,18 +485,115 @@ class Routing(object):
                 new_route1.append(copy.deepcopy(self.path[i]))
                 new_route2.append(copy.deepcopy(self.path[i]))
 
-        sub1_start = copy.deepcopy(self.path[route_index1][0:sub1])
-        sub2_end = copy.deepcopy(self.path[route_index2][sub2:])
-        new_route1.append(sub1_start + sub2_end)
+        tmp1 = copy.deepcopy(self.path[route_index1][0:sub1])
+        tmp2 = copy.deepcopy(self.path[route_index2][sub2:])
+        new_route1.append(tmp1 + tmp2)
 
-        tmp = copy.deepcopy(self.path[route_index2][0:sub2])
-        new_route1.append(tmp + copy.deepcopy(self.path[route_index1][sub1:]))
+        tmp1 = copy.deepcopy(self.path[route_index2][0:sub2])
+        tmp2 = copy.deepcopy(self.path[route_index1][sub1:])
+        new_route1.append(tmp1 + tmp2)
 
-        new_route2.append(sub1_start + reverse_edges(self.path[route_index2][0:sub2]))
+        tmp1 = copy.deepcopy(self.path[route_index1][0:sub1])
+        tmp2 = reverse_edges(self.path[route_index2][0:sub2])
+        new_route2.append(tmp1 + tmp2)
 
-        tmp = reverse_edges(self.path[route_index1][sub1:])
-        new_route2.append(tmp + sub2_end)
+        tmp1 = reverse_edges(self.path[route_index1][sub1:])
+        tmp2 = copy.deepcopy(self.path[route_index2][sub2:])
+        new_route2.append(tmp1 + tmp2)
+
         return new_route1, new_route2
+
+    def fix(self, map_dij, capacity, rule_num):
+        fixed = []
+        free = []
+        l = []  # load list
+        test = 0
+        # assert len(self.path) >= 7
+        for i in range(0, len(self.path)):
+            Tdemand = 0
+            tmp_fix = []
+            tmp_load = 0
+            for j in range(0, len(self.path[i])):
+                [istart, iend] = self.path[i][j]
+                temp = Tdemand + map_dij.get_demand(istart, iend)
+                if temp <= capacity:
+                    Tdemand = temp
+                    tmp_load = temp
+                    tmp_fix.append([istart, iend])
+                else:
+                    Tdemand = temp
+                    icost = map_dij.get_cost(istart, iend)
+                    idemand = map_dij.get_demand(istart, iend)
+                    free.append([istart, iend, icost, idemand])
+            l.append(tmp_load)
+            test += Tdemand
+            fixed.append(tmp_fix)
+
+        while [] in fixed:
+            fixed.remove([])
+
+        k = -1
+        out_of_index = rule_num < 0 or rule_num > 5
+        while True:
+            k = k + 1
+            if k < len(fixed):
+                r = fixed[k]
+                i = r[-1][1]
+                load = l[k]
+            else:
+                r = []
+                i = 1
+                load = 0
+            remain = capacity - load
+
+            while True:
+                dist = sys.maxint
+                edge = None
+                for it in free:
+                    # it格式 [a,b,c,d] a起点 0，b终点 1，c COST 2，d DEMAND 3
+                    [istart, iend, icost, idemand] = it
+                    if out_of_index:
+                        rule_num = random.randint(1, 5)
+                    if load + idemand <= capacity:
+                        # 正面
+                        if map_dij.get_dist(i, istart) < dist:
+                            dist = map_dij.get_dist(i, istart)
+                            edge = it
+                        elif dist == map_dij.get_dist(i, istart) and better(it, edge, remain, map_dij, capacity,
+                                                                            rule_num,
+                                                                            False):
+                            edge = it
+                        # 反面
+                        if map_dij.get_dist(i, iend) < dist:
+                            dist = map_dij.get_dist(i, iend)
+                            edge = [iend, istart, icost, idemand]
+                        elif dist == map_dij.get_dist(i, iend) and better(it, edge, remain, map_dij, capacity, rule_num,
+                                                                          True):
+                            edge = [iend, istart, icost, idemand]
+                    else:
+                        continue
+                # end for
+                if edge is not None:
+                    [istart, iend, icost, idemand] = edge
+                    r.append([istart, iend])
+                    remove_free(free, edge)
+                    load = load + idemand
+                    remain = capacity - load
+                    i = iend
+
+                if len(free) == 0 or dist == sys.maxint:
+                    break
+                    # end in loop
+
+            if k < len(l):
+                l[k] = load
+            else:
+                l.append(load)
+                fixed.append(r)
+            if len(free) == 0:
+                break
+                # end out loop
+        return fixed
 
 
 def invedge(edge):
@@ -539,9 +633,9 @@ class Population:
         self.routing_list = []
         self.dist_map = dist_map
 
-    def initial(self, edge_set, vertex_dij, vehicles, capacity):
+    def initial(self, initial_size, edge_set, vertex_dij, vehicles, capacity):
         print "\nInitial Route:"
-        for i in range(1, 6):
+        for i in range(1, initial_size + 1):
             print "Rule{}".format(i)
             (rt, load, cost) = path_scanning(edge_set, vertex_dij, capacity, i)
             s_rt = simplify_edge(rt)
@@ -575,6 +669,16 @@ class Population:
                 if temp.check():  # 检测是否符合规则
                     link.append(temp)
                     counter = counter - 1
+                else:
+                    rule = random.randint(1, 5)
+                    rt = temp.fix(self.dist_map, capacity, rule)
+                    fixed = Routing(rt, vehicles, capacity)
+                    # print rt
+                    fixed.calc_cost(self.dist_map)
+                    if fixed.check():  # 检测是否符合规则
+                        link.append(fixed)
+                        counter = counter - 1
+                        # 这里修不好就不要了
         self.routing_list.extend(link)
 
     def select(self):
@@ -630,8 +734,8 @@ def search_CARP(file_name, limited_time, ram_seed):
     vertex_dij = dij.Dijkstra(vertex)
     # vertex_dij.print_graph()
 
-    group = Population(100, 400, vertex_dij)
-    group.initial(free, vertex_dij, vehicles, capacity)
+    group = Population(200, 600, vertex_dij)
+    group.initial(1000, free, vertex_dij, vehicles, capacity)
     group.select()
     group.top_best(3)
     run_time = (time.time() - start)
@@ -653,4 +757,10 @@ def search_CARP(file_name, limited_time, ram_seed):
 
 
 if __name__ == '__main__':
-    search_CARP("CARP_samples\\egl-s1-A.dat", 60, None)
+    search_CARP("CARP_samples\\egl-s1-A.dat", 120, None)
+
+    # sem = [[[116,117],[117,2],[117,119],[124,126],[126,130],[118,114],[114,113],[113,112],[116,1]],[[112,107],[108,109],[108,107],[107,110],[110,111],[110,112]],[[107,106],[106,105],[105,104],[104,102],[66,62],[62,63],[63,64],[64,65],[56,55],[55,54],[55,140],[140,49],[49,48],[67,68]],[[95,96],[96,97],[97,98],[66,67],[67,69],[69,71],[71,72],[72,73],[73,44],[44,45],[45,34],[34,139]],[[43,44],[139,33],[33,11],[11,8],[6,5],[6,8],[8,9],[13,12]],[[87,86],[86,85],[85,84],[84,82],[82,80],[80,79],[79,78],[78,77],[77,46],[46,43],[43,37],[37,36],[36,38],[38,39],[39,40]],[[11,27],[27,28],[28,29],[28,30],[30,32],[27,25],[25,24],[24,20],[20,22],[13,14],[12,11]]]
+    # sem =[[[1,116],[116,117],[117,119],[117,2],[118,114],[114,113],[113,112],[112,110],[110,111],[110,107],[107,108],[105,104]],[[87,86],[86,85],[85,84],[84,82],[82,80],[80,79],[79,78],[78,77],[77,46],[46,43],[43,37],[37,36],[36,38],[38,39],[39,40]],[[108,109],[66,62],[62,63],[63,64],[64,65],[56,55],[55,54],[55,140],[49,48]],[[124,126],[126,130],[43,44],[34,139],[139,33],[33,11],[11,12],[12,13],[20,22]],[[95,96],[96,97],[97,98],[140,49],[11,8],[6,5],[8,9],[13,14],[8,6],[24,25],[27,28]],[[11,27],[27,25],[24,20],[28,29],[28,30],[30,32]],[[112,107],[107,106],[106,105],[104,102],[66,67],[67,68],[67,69],[69,71],[45,34]],[[112,107],[107,106],[106,105],[104,102],[66,67],[67,68],[67,69],[69,71],[71,72],[72,73],[73,44],[44,45],[71,72],[72,73],[73,44],[44,45],[45,34]]]
+    # sem =[[[1,116],[116,117],[117,119],[117,2],[118,114],[114,113],[113,112],[112,110],[110,111],[110,107],[107,108],[105,104]],[[87,86],[86,85],[85,84],[84,82],[82,80],[80,79],[79,78],[78,77],[77,46],[46,43],[43,37],[37,36],[36,38],[38,39],[39,40]],[[108,109],[66,62],[62,63],[63,64],[64,65],[56,55],[55,54],[55,140],[49,48]],[[124,126],[126,130],[43,44],[34,139],[139,33],[33,11],[11,12],[12,13],[20,22]],[[95,96],[96,97],[97,98],[140,49],[11,8],[6,5],[8,9],[13,14],[8,6],[24,25],[27,28]],[[11,27],[27,25],[24,20],[28,29],[28,30],[30,32]],[[112,107],[107,106],[106,105],[104,102],[66,67],[67,68],[67,69],[69,71],[45,34]],[[71,72],[72,73],[73,44],[44,45],[71,72],[72,73],[73,44],[44,45],[45,34]]]
+    # te = Routing(sem, vehicles,capacity)
+    # te.print_route(vertex_dij)
