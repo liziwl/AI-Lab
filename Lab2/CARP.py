@@ -102,7 +102,7 @@ def free_edge_set(data):
     """
     取出所有有需求的边，每条边只存一次
     :param data: 源数据
-    :return: 邻接矩阵
+    :return: 空闲边列表
     """
     free = []
     for it in range(8, len(data)):
@@ -210,6 +210,14 @@ def rule5(u, uPrev, remain, map_dij, capacity, isinv):
         return rule3(u, uPrev, remain, map_dij, capacity, isinv)
     else:
         return rule4(u, uPrev, remain, map_dij, capacity, isinv)
+
+
+def rule6(u, uPrev, remain, map_dij, capacity, isinv):
+    flag = random.randint(0, 1)
+    if flag == 0:
+        return True
+    else:
+        return False
 
 
 def remove_free(free, edge):
@@ -632,23 +640,46 @@ class Population:
         self.generate_size = generate_size
         self.routing_list = []
         self.dist_map = dist_map
+        self.is_mature = False
+
+    def mature_reset(self):
+        self.is_mature = False
 
     def initial(self, initial_size, edge_set, vertex_dij, vehicles, capacity):
-        print "\nInitial Route:"
+        # print "\nInitial Route:"
         for i in range(1, initial_size + 1):
-            print "Rule{}".format(i)
+            # print "Rule{}".format(i)
             (rt, load, cost) = path_scanning(edge_set, vertex_dij, capacity, i)
             s_rt = simplify_edge(rt)
 
             temp = Routing(s_rt, vehicles, capacity)
             temp.calc_cost(vertex_dij)
-            temp.print_route(vertex_dij)
+            # temp.print_route(vertex_dij)
             self.add_route(temp)
-            print ""
+            # print ""
 
     def add_route(self, route):
         if route.check():
             self.routing_list.append(route)
+
+    def check_mature(self):
+        routes_cost = []
+        for rt in self.routing_list:
+            routes_cost.append(rt.total_cost)
+
+        cost_counter = {}
+        for rt in routes_cost:
+            if routes_cost.count(rt) > 1:
+                cost_counter[rt] = routes_cost.count(rt)
+
+        # print "----------------"
+        # print cost_counter
+        # print "----------------"
+        if len(cost_counter) == 1:
+            self.is_mature = True
+            # print "-------this is mature-------"
+
+        return self.is_mature
 
     def generate(self, rule_num, vehicles, capacity):
         """
@@ -684,6 +715,10 @@ class Population:
     def select(self):
         self.routing_list.sort()
         self.routing_list = self.routing_list[0:self.select_size]
+
+    def resize(self, size):
+        self.routing_list.sort()
+        self.routing_list = self.routing_list[0:size]
 
     def top_best(self, num):
         self.routing_list.sort()
@@ -724,8 +759,8 @@ def search_CARP(file_name, limited_time, ram_seed):
     capacity = sample[6]
     random.seed(ram_seed)
 
-    print sample
-    print_head(sample)
+    # print sample
+    # print_head(sample)
 
     free = free_edge_set(sample)
     # print free
@@ -735,29 +770,38 @@ def search_CARP(file_name, limited_time, ram_seed):
     # vertex_dij.print_graph()
 
     group = Population(200, 600, vertex_dij)
-    group.initial(1000, free, vertex_dij, vehicles, capacity)
+    group.initial(2000, free, vertex_dij, vehicles, capacity)
     group.select()
-    group.top_best(3)
+    # group.top_best(3)
     run_time = (time.time() - start)
     count = 1
 
-    while run_time <= limited_time:
-        print "\nLOOP: {}".format(count)
-        rule_num = random.randint(1, 5)
+    end_time = limited_time - 1.5
+    while run_time <= end_time:
+        # print "\nLOOP: {}".format(count)
+        if group.check_mature():
+            rule_num = random.randint(4, 5)
+            # print "-----------resize-----------"
+            group.resize(5)
+            group.mature_reset()
+        else:
+            rule_num = random.randint(1, 5)
+            group.mature_reset()
+        # rule_num = random.randint(1, 5)
         group.generate(rule_num, vehicles, capacity)
         group.select()
-        group.top_best(5)
+        # group.top_best(5)
         run_time = (time.time() - start)
-        print "LOOP: {} TIME: {}s".format(count, run_time)
+        # print "LOOP: {} TIME: {}s RULE: {}".format(count, run_time, rule_num)
         count += 1
 
     run_time = (time.time() - start)
-    print "\nTIME: {}s".format(run_time)
+    # print "\nTIME: {}s".format(run_time)
     group.print_result()
 
 
 if __name__ == '__main__':
-    search_CARP("CARP_samples\\egl-s1-A.dat", 120, None)
+    search_CARP("CARP_samples\\gdb1.dat", 60, None)
 
     # sem = [[[116,117],[117,2],[117,119],[124,126],[126,130],[118,114],[114,113],[113,112],[116,1]],[[112,107],[108,109],[108,107],[107,110],[110,111],[110,112]],[[107,106],[106,105],[105,104],[104,102],[66,62],[62,63],[63,64],[64,65],[56,55],[55,54],[55,140],[140,49],[49,48],[67,68]],[[95,96],[96,97],[97,98],[66,67],[67,69],[69,71],[71,72],[72,73],[73,44],[44,45],[45,34],[34,139]],[[43,44],[139,33],[33,11],[11,8],[6,5],[6,8],[8,9],[13,12]],[[87,86],[86,85],[85,84],[84,82],[82,80],[80,79],[79,78],[78,77],[77,46],[46,43],[43,37],[37,36],[36,38],[38,39],[39,40]],[[11,27],[27,28],[28,29],[28,30],[30,32],[27,25],[25,24],[24,20],[20,22],[13,14],[12,11]]]
     # sem =[[[1,116],[116,117],[117,119],[117,2],[118,114],[114,113],[113,112],[112,110],[110,111],[110,107],[107,108],[105,104]],[[87,86],[86,85],[85,84],[84,82],[82,80],[80,79],[79,78],[78,77],[77,46],[46,43],[43,37],[37,36],[36,38],[38,39],[39,40]],[[108,109],[66,62],[62,63],[63,64],[64,65],[56,55],[55,54],[55,140],[49,48]],[[124,126],[126,130],[43,44],[34,139],[139,33],[33,11],[11,12],[12,13],[20,22]],[[95,96],[96,97],[97,98],[140,49],[11,8],[6,5],[8,9],[13,14],[8,6],[24,25],[27,28]],[[11,27],[27,25],[24,20],[28,29],[28,30],[30,32]],[[112,107],[107,106],[106,105],[104,102],[66,67],[67,68],[67,69],[69,71],[45,34]],[[112,107],[107,106],[106,105],[104,102],[66,67],[67,68],[67,69],[69,71],[71,72],[72,73],[73,44],[44,45],[71,72],[72,73],[73,44],[44,45],[45,34]]]

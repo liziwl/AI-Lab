@@ -49,8 +49,8 @@ def command_line_reader(argv):
 
 if __name__ == "__main__":
     file_name, termination, seed = command_line_reader(sys.argv[1:])
-    print 'file name: ', file_name
-    print 'termination: ', termination
-    print 'seed: ', seed
-    seed = 386817356579
+    # print 'file name: ', file_name
+    # print 'termination: ', termination
+    # print 'seed: ', seed
+    # seed = None
     CARP.search_CARP(file_name, termination, seed)
