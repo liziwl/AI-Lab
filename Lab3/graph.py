@@ -1,4 +1,5 @@
 # encoding: utf-8
+import random
 
 
 class Graph:
@@ -6,6 +7,16 @@ class Graph:
         self.node_dict = node_dict
         self.node_inv = node_inv
         # 存的是邻接矩阵
+
+    def nodes(self):
+        counter = set()
+        for node in self.node_inv:
+            counter.add(node)
+        for node in self.node_dict:
+            counter.add(node)
+        node_list = list(counter)
+        node_list.sort()
+        return node_list
 
     def get_weight(self, i, j):
         return self.node_dict[i][j]
@@ -21,6 +32,17 @@ class Graph:
             return self.node_inv[i].keys()
         else:
             return []
+
+    def get_thresh(self):
+        thresh = {}
+        for node in self.node_inv:
+            if node not in thresh:
+                thresh[node] = random.random()
+
+        for node in self.node_dict:
+            if node not in thresh:
+                thresh[node] = random.random()
+        return thresh
 
 
 def list2dict(node_list):
@@ -49,7 +71,6 @@ def inv_list2dict(node_list):
     :return: 逆邻接矩阵
     """
     dic = {}
-    print node_list
     for i in range(0, len(node_list)):
         from_node, to_node, weight = node_list[i]
         if to_node in dic:
@@ -102,15 +123,20 @@ def read_seed(file_name):
 
 
 if __name__ == "__main__":
-    data = read_network("network.txt")
-    print data
-
-    d = list2dict(data[2])
+    d = read_network("network.txt")
     print d
 
-    invd = list2dict(data[2])
-    # print invd
+    d1 = list2dict(d[2])
+    print_graph(d1)
+    print "-----------------------------"
+    d2 = inv_list2dict(d[2])
+    print_graph(d2)
 
-    test = Graph(d, invd)
+    test = Graph(d1, d2)
     print test.get_weight(14, 10)
+    print "***********************************"
     print test.get_neighbor(14)
+
+    print_graph(test.node_inv)
+    print test.get_parent(1)
+    print test.nodes()
