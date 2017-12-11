@@ -6,38 +6,45 @@ import random
 import numpy as np
 
 
-def sample(model, seed, graph):
+def sample(model, seed, network, fast=True):
+    if fast:
+        return evaluate_specific(model, seed, network, 100)
+    else:
+        return evaluate_specific(model, seed, network, 1000)
+
+
+def evaluate_specific(model, seed, network, times):
     start = time.time()
     if model == 'IC':
         sample_list = []
-        for i in range(0, 10000):
-            sample_list.append(ic(seed, graph))
+        for i in range(0, times):
+            sample_list.append(ic(seed, network))
         run_time = (time.time() - start)
-        print "TIME: {}s".format(run_time)
+        # print "TIME: {}s".format(run_time)
         return np.mean(sample_list)
     elif model == 'LT':
         sample_list = []
-        for i in range(0, 10000):
-            sample_list.append(lt(seed, graph))
+        for i in range(0, times):
+            sample_list.append(lt(seed, network))
         run_time = (time.time() - start)
-        print "TIME: {}s".format(run_time)
+        # print "TIME: {}s".format(run_time)
         return np.mean(sample_list)
     else:
         return -1
 
 
-def ic(seed_list, graph):
+def ic(seed_list, network):
     activated = set(seed_list)
     activity = set(seed_list)
     count = len(activity)
     while len(activity) > 0:
         new_activity = set()
         for it in activity:
-            neighbor = graph.get_neighbor(it)
+            neighbor = network.get_neighbor(it)
             for nei in neighbor:
                 if nei not in activated:  # 除去已经激活的点
                     prob = random.random()
-                    if prob <= graph.get_weight(it, nei):
+                    if prob <= network.get_weight(it, nei):
                         activated.add(nei)
                         new_activity.add(nei)
         count += len(new_activity)
@@ -46,22 +53,22 @@ def ic(seed_list, graph):
     return count
 
 
-def lt(seed_list, graph):
+def lt(seed_list, network):
     activated = set(seed_list)
     activity = set(seed_list)
-    thresh = graph.get_thresh()
+    thresh = network.get_thresh()
     count = len(activity)
     while len(activity) > 0:
         new_activity = set()
         for it in activity:
-            neighbor = graph.get_neighbor(it)
+            neighbor = network.get_neighbor(it)
             for nei in neighbor:
                 if nei not in activated:  # 除去已经激活的点
-                    parent = graph.get_parent(nei)
+                    parent = network.get_parent(nei)
                     w_total = 0
                     for p in parent:
                         if p in activated:
-                            w_total += graph.get_weight(p, nei)
+                            w_total += network.get_weight(p, nei)
                     if w_total >= thresh[nei]:
                         activated.add(nei)
                         new_activity.add(nei)
@@ -79,12 +86,18 @@ if __name__ == "__main__":
     print seed
 
     d1 = graph.list2dict(d[2])
-    # graph.print_graph(d1)
+    graph.print_graph(d1)
     # print "-----------------------------"
     d2 = graph.inv_list2dict(d[2])
     # graph.print_graph(d2)
 
     test = graph.Graph(d1, d2)
+    seed = [53, 56, 58, 62]  # 27.3075/31.8265
+    seed = [28, 53, 56, 58]  # 27.077/31.31
+    seed = [48, 53, 56, 58]  # 26.9996/ 32.7784
+    seed = [50, 53, 56, 58]  # 27.0631/31.2291
     print sample('IC', seed, test)
+    print sample('IC', seed, test, False)
 
     print sample('LT', seed, test)
+    print sample('LT', seed, test, False)
