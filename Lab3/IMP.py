@@ -24,8 +24,8 @@ class Seed(object):
         self.seed = seed
         self.influence = 0
 
-    def evaluate(self, model, network, fast=True):
-        self.influence = ISE.sample(model, self.seed, network, fast)
+    def evaluate(self, model, network, speed=ISE.FAST):
+        self.influence = ISE.sample(model, self.seed, network, speed)
 
     def __cmp__(self, other):
         if self.influence < other.influence:
@@ -241,7 +241,7 @@ if __name__ == "__main__":
 
     fine_seed = seeds[0:10]
     for i in range(0, len(fine_seed)):
-        fine_seed[i].evaluate('LT', test, False)
+        fine_seed[i].evaluate('LT', test, ISE.SLOW)
 
     fine_seed.sort(reverse=True)
     print len(fine_seed), fine_seed
