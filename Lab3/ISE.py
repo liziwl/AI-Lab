@@ -46,11 +46,16 @@ def ic(seed_list, network):
     while len(activity) > 0:
         new_activity = set()
         for it in activity:
-            neighbor = network.get_neighbor(it)
+            # neighbor = network.get_neighbor(it)
+            if it in network.node_dict:
+                neighbor = network.node_dict[it]
+            else:
+                neighbor = []
             for nei in neighbor:
                 if nei not in activated:  # 除去已经激活的点
                     prob = random.random()
-                    if prob <= network.get_weight(it, nei):
+                    # if prob <= network.get_weight(it, nei):
+                    if prob <= neighbor[nei]:
                         activated.add(nei)
                         new_activity.add(nei)
         count += len(new_activity)
@@ -62,19 +67,27 @@ def ic(seed_list, network):
 def lt(seed_list, network):
     activated = set(seed_list)
     activity = set(seed_list)
-    thresh = network.get_thresh()
+    thresh = {}
     count = len(activity)
     while len(activity) > 0:
         new_activity = set()
         for it in activity:
-            neighbor = network.get_neighbor(it)
+            # neighbor = network.get_neighbor(it)
+            if it in network.node_dict:
+                neighbor = network.node_dict[it]
+            else:
+                neighbor = []
             for nei in neighbor:
                 if nei not in activated:  # 除去已经激活的点
-                    parent = network.get_parent(nei)
+                    # parent = network.get_parent(nei)
+                    parent = network.node_inv[nei]
                     w_total = 0
                     for p in parent:
                         if p in activated:
-                            w_total += network.get_weight(p, nei)
+                            w_total += parent[p]
+                            # w_total += network.get_weight(p, nei)
+                    if nei not in thresh:
+                        thresh[nei] = random.random()
                     if w_total >= thresh[nei]:
                         activated.add(nei)
                         new_activity.add(nei)
