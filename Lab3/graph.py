@@ -6,7 +6,7 @@ class Graph:
     def __init__(self, node_dict, node_inv):
         self.node_dict = node_dict
         self.node_inv = node_inv
-        # 存的是邻接矩阵
+        # 存入邻接矩阵
 
     def nodes(self):
         counter = set()
@@ -23,13 +23,13 @@ class Graph:
 
     def get_neighbor(self, i):
         if i in self.node_dict:
-            return self.node_dict[i].keys()
+            return self.node_dict[i]
         else:
             return []
 
     def get_parent(self, i):
         if i in self.node_inv:
-            return self.node_inv[i].keys()
+            return self.node_inv[i]
         else:
             return []
 
