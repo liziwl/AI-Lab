@@ -278,10 +278,10 @@ def solver(network, size, model, termination, utime, rand):
         fine_seed[i].evaluate(model, grap, ISE.MEDIUM)
     seeds.sort(reverse=True)
 
-    print_seed(seeds[0].seed) # 打印结果
+    print_seed(seeds[0].seed)  # 打印结果
     run_time = (time.time() - start)
     # print "TIME4: {}s".format(run_time)
-    return seeds[0] # 返回Seed 对象
+    return seeds[0]  # 返回Seed 对象
 
 
 if __name__ == "__main__":
