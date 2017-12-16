@@ -4,6 +4,7 @@ import time
 import graph
 import random
 import numpy as np
+import options
 
 FAST = 1
 MEDIUM = 2
@@ -26,14 +27,14 @@ def evaluate_specific(model, seed, network, times):
         for i in range(0, times):
             sample_list.append(ic(seed, network))
         run_time = (time.time() - start)
-        print "TIME: {}s".format(run_time)
+        # print "TIME: {}s".format(run_time)
         return np.mean(sample_list)
     elif model == 'LT':
         sample_list = []
         for i in range(0, times):
             sample_list.append(lt(seed, network))
         run_time = (time.time() - start)
-        print "TIME: {}s".format(run_time)
+        # print "TIME: {}s".format(run_time)
         return np.mean(sample_list)
     else:
         return -1
@@ -97,28 +98,44 @@ def lt(seed_list, network):
     return count
 
 
+def solver(network, seed, model, termination, utime, rand):
+    random.seed(rand)
+    data = graph.read_network(network)
+    d1 = graph.list2dict(data[2])
+    d2 = graph.inv_list2dict(data[2])
+    grap = graph.Graph(d1, d2)
+    seed_data = graph.read_seed(seed)
+
+    if termination == 0:
+        return sample(model, seed_data, grap, SLOW)
+    elif termination == 1:
+        sample_data = []
+        start = time.time()
+        sample_data.append(sample(model, seed_data, grap, MEDIUM))
+        run_time = (time.time() - start)
+        base_time = run_time + 0.5
+
+        while run_time < utime - base_time:
+            sample_data.append(sample(model, seed_data, grap, MEDIUM))
+            run_time = (time.time() - start)
+
+        # print "TIME: {}s".format(run_time)
+        return np.mean(sample_data)
+
+
 if __name__ == "__main__":
-    d = graph.read_network("network.txt")
-    # print d
-
-    seed = graph.read_seed("seeds.txt")
-    print seed
-
-    d1 = graph.list2dict(d[2])
-    graph.print_graph(d1)
-    # print "-----------------------------"
-    d2 = graph.inv_list2dict(d[2])
-    # graph.print_graph(d2)
-
-    test = graph.Graph(d1, d2)
-    seed = [53, 56, 58, 62]  # 27.3075/31.8265
-    seed = [28, 53, 56, 58]  # 27.077/31.31
-    seed = [48, 53, 56, 58]  # 26.9996/ 32.7784
-    seed = [50, 53, 56, 58]  # 27.0631/31.2291
-    print sample('IC', seed, test)
-    print sample('IC', seed, test, MEDIUM)
-    print sample('IC', seed, test, SLOW)
-
-    print sample('LT', seed, test)
-    print sample('LT', seed, test, MEDIUM)
-    print sample('LT', seed, test, SLOW)
+    # seed = [53, 56, 58, 62]  # 27.3075/31.8265
+    # seed = [28, 53, 56, 58]  # 27.077/31.31
+    # seed = [48, 53, 56, 58]  # 26.9996/ 32.7784
+    # seed = [50, 53, 56, 58]  # 27.0631/31.2291
+    # network = "network.txt"
+    # seed = "seeds10.txt"
+    # model = "IC"
+    # termination = 0
+    # utime = 12
+    # rand = None
+    network, seed, model, termination, utime, rand = options.ise_parse_command_line()
+    # start = time.time()
+    print solver(network, seed, model, termination, utime, rand)
+    # run_time = (time.time() - start)
+    # print "TIME: {}s".format(run_time)

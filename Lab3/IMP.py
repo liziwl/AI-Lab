@@ -4,8 +4,8 @@ import time
 import graph
 import random
 import ISE
-import copy
 import numpy as np
+import options
 
 '''
 # ISE 评估一个seed的影响
@@ -23,6 +23,9 @@ class Seed(object):
     def __init__(self, seed):
         self.seed = seed
         self.influence = 0
+
+    def set_influence(self, inf):
+        self.influence = inf
 
     def evaluate(self, model, network, speed=ISE.FAST):
         self.influence = ISE.sample(model, self.seed, network, speed)
@@ -104,6 +107,7 @@ def degreeDiscountIC(network, k, p=.01):
         adjacent[it] = 0
         if it in network.node_dict:
             degree[it] = sum(network.node_dict[it].values())
+            assert degree[it] > 0
             # print 'in degree:', it, degree[it]
             degree_discount.put(Node_degree(it, degree[it]))
         else:
@@ -111,34 +115,29 @@ def degreeDiscountIC(network, k, p=.01):
 
     top_rand = k ** 2
     if top_rand > len(degree):
-        top_rand = degree
-
-    # print_queue(degree_discount)
+        top_rand = len(degree)
 
     for i in range(k):
         temp = []
         for j in range(top_rand):
-            temp.append(degree_discount.get())
+            if not degree_discount.empty():
+                temp.append(degree_discount.get_nowait())
 
-        # index = get_exp_rand(0, top_rand, 0.5) # 按照指数函数分布取值
+        # index = get_exp_rand(0, len(temp), 0.5)  # 按照指数函数分布取值
         index = get_rand_node(temp)  # 以weight作为权重取值
-        # index = random.randint(0,top_rand-1) # 平均随机数取值
-        # print "index:", index
 
         # 没用过的数放回
-        for j in range(top_rand):
+        for j in range(len(temp)):
             if j != index:
                 degree_discount.put(temp[j])
 
         it = temp[index].node
-        # it = degree_discount.get().node
-        # print 'node:', it
 
+        # it = degree_discount.get().node
         # 选择或许存在的强力影响的父节点
         big_parent = find_big_parent(network, it)
         if len(big_parent) != 0:
             degree_discount.put(temp[index])
-            # index = random.randint(0, len(big_parent) - 1)
             counter = 0
             while len(big_parent) != 0:
                 counter += 1
@@ -148,8 +147,9 @@ def degreeDiscountIC(network, k, p=.01):
                 big_parent = find_big_parent(network, big_parent[index])
 
             big_parent, index = before
-            seed.append(big_parent[index])
             it = big_parent[index]
+            del_node(degree_discount, it)
+            seed.append(it)
         else:
             seed.append(it)
 
@@ -158,9 +158,23 @@ def degreeDiscountIC(network, k, p=.01):
                 # adjacent[nei] += 1
                 adjacent[nei] += network.get_weight(it, nei)
                 priority = degree[nei] - 2 * adjacent[nei] - (degree[nei] - adjacent[nei]) * adjacent[nei] * p
-                degree_discount.put(Node_degree(nei, priority))
+                if priority >= 0:
+                    degree_discount.put(Node_degree(nei, priority))
     seed.sort()
     return seed
+
+
+def del_node(dd, n):
+    buf = []
+    while not dd.empty():
+        temp = dd.get()
+        if temp.node == n:
+            break
+        else:
+            buf.append(temp)
+
+    for it in buf:
+        dd.put(it)
 
 
 def get_exp_rand(start, end, lambd):
@@ -178,6 +192,11 @@ def get_exp_rand(start, end, lambd):
 
 
 def get_rand_node(optional):
+    """
+    generate random numbers by weight
+    :param optional: degree discount list
+    :return: node number
+    """
     nodes = []
     prob = []
     for i in range(0, len(optional)):
@@ -194,54 +213,84 @@ def get_rand_node(optional):
 
 
 def remove_duplicate(seeds):
-    rmdup = set()
+    rmdup = dict()
     for it in seeds:
-        rmdup.add(tuple(it.seed))
-    print len(seeds), len(rmdup)
+        key = tuple(it.seed)
+        if key in rmdup:
+            if rmdup[key] > it.influence:
+                rmdup[key] = it.influence
+        else:
+            rmdup[key] = it.influence
+    # print len(seeds), len(rmdup)
 
     out = []
     for it in rmdup:
-        out.append(Seed(list(it)))
+        s = Seed(list(it))
+        s.set_influence(rmdup[it])
+        out.append(s)
     return out
 
 
-if __name__ == "__main__":
-    d = graph.read_network("network.txt")
-    # d = graph.read_network("AI_IMP_testdata\\NetHEPT.txt")
-    # d = graph.read_network("AI_IMP_testdata\\physical.txt")
-    # d = graph.read_network("AI_IMP_testdata\\NetPHY.txt")
-    # print d
+def print_seed(seed):
+    for i in seed:
+        print i
 
-    d1 = graph.list2dict(d[2])
-    # graph.print_graph(d1)
-    # print "-----------------------------"
-    d2 = graph.inv_list2dict(d[2])
-    # graph.print_graph(d2)
-    test = graph.Graph(d1, d2)
 
-    s = Seed(degreeDiscountIC(test, 4, 0.01))
-    s.evaluate('IC', test)
-    print s
+def solver(network, size, model, termination, utime, rand):
+    random.seed(rand)
+    data = graph.read_network(network)
+    d1 = graph.list2dict(data[2])
+    d2 = graph.inv_list2dict(data[2])
+    grap = graph.Graph(d1, d2)
 
+    seed_size = size
     seeds = []
-    for i in range(0, 500 + 1):
-        s = Seed(degreeDiscountIC(test, 4, 0.01))
-        seeds.append(s)
+    fine_seed = []
 
-    # start = time.time()
-    seeds = remove_duplicate(seeds)
-    # run_time = (time.time() - start)
-    # print "TIME: {}s".format(run_time)
+    start = time.time()
+    if termination == 0:
+        for i in range(1000):
+            s = Seed(degreeDiscountIC(grap, seed_size, 0.01))
+            s.evaluate(model, grap)
+            seeds.append(s)
 
-    for s in seeds:
-        s.evaluate('IC', test)
+        seeds = remove_duplicate(seeds)
+        seeds.sort(reverse=True)
+        fine_seed = seeds[0:10]
+        run_time = (time.time() - start)
+        # print "TIME1: {}s".format(run_time)
+    elif termination == 1:
+        run_time = (time.time() - start)
+        # print "TIME1: {}s".format(run_time)
+        while run_time + 1 < utime:
+            s = Seed(degreeDiscountIC(grap, seed_size, 0.01))
+            s.evaluate(model, grap)
+            seeds.append(s)
+            run_time = (time.time() - start)
 
-    seeds.sort(reverse=True)
-    print seeds
+        seeds = remove_duplicate(seeds)
+        seeds.sort(reverse=True)
+        fine_seed = seeds[0:10]
+        run_time = (time.time() - start)
+        # print "TIME2: {}s".format(run_time)
 
-    fine_seed = seeds[0:10]
     for i in range(0, len(fine_seed)):
-        fine_seed[i].evaluate('LT', test, ISE.SLOW)
+        fine_seed[i].evaluate(model, grap, ISE.MEDIUM)
+    seeds.sort(reverse=True)
 
-    fine_seed.sort(reverse=True)
-    print len(fine_seed), fine_seed
+    print_seed(seeds[0].seed) # 打印结果
+    run_time = (time.time() - start)
+    # print "TIME4: {}s".format(run_time)
+    return seeds[0] # 返回Seed 对象
+
+
+if __name__ == "__main__":
+    # network = "network.txt"
+    # size = 8
+    # model = "IC"
+    # termination = 0
+    # utime = 5
+    # rand = None
+    network, size, model, termination, utime, rand = options.imp_parse_command_line()
+    # print solver(network, size, model, termination, utime, rand)
+    solver(network, size, model, termination, utime, rand)

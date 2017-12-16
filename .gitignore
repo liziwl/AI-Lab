@@ -9,6 +9,8 @@
 *.out
 *.gz
 *.tex
+*.bbl
+*.blg
 
 *.doc
 *.docx
