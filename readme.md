@@ -1,6 +1,10 @@
 # Artificial intelligence
 CS303 of SUSTech
 
+## Environment
+Lab 1-3: Python2
+Lab 4: Python3 
+
 ## Lab1 - go
 示例文件共有7个（train_0.txt, train_00.txt, train_1.txt ~ train_5.txt），其中每个示例文件存放一个围棋残局，存放格式为“行数 列数 颜色”，-1表示⿊色，1表示白色，
 ### 要求
@@ -18,9 +22,9 @@ numpy additional materials：
 1. [Doc](https://docs.scipy.org/doc/numpy/genindex.html)
 2. [TutorialsPoint NumPy 教程](http://www.jianshu.com/p/57e3c0a92f3a)
 
-# Lab2 - Capacitated Arc Routing Problem (CARP)
+## Lab2 - Capacitated Arc Routing Problem (CARP)
 
-## Data Format
+### Data Format
 
 1st line: NAME : \<string> i.e., the name of the instance;
 
@@ -40,7 +44,7 @@ numpy additional materials：
 
 9th line: NODES    COST    DEMAND
 
-## Implement Path
+### Implement Path
 
 1. Using Regular expression to read data and store them in format
 2. Path scanning[1] generates initial solution.
@@ -53,9 +57,19 @@ numpy additional materials：
 
 3. Mutation[2] reproduct new generation.
 
-### Reference
+#### Reference
 [1] A. C. C. Corberán and G. Laporte, *Arc routing: problems, methods*, and applications. Philadelphia: Society for Industrial and Applied Mathematics, 2014.
 
 [2] K. Tang, Y. Mei, and X. Yao, “Memetic algorithm with extended neighborhood search for capacitated arc routing problems,” *IEEE Transactions on Evolutionary Computation*, vol. 13, no. 5, pp. 1151–1166, 2009.
 
 3. [Benchmarks of Vector Packing Problem](http://logistik.bwl.uni-mainz.de/benchmarks.php)
+
+## Lab3 - Influence Maximization Problem
+
+Influence Maximization Problem is the problem of finding a small subset of nodes(seed nodes) in a social network,that could maximize the spread of influence. The IMP is NP-hard and the influence spread computation is \#P -hard under the definitions shown in the introduction. I improve **Degree Discount IC** Algorithm [1], which can pick up the parent of high impact node. Besides, I also implement influence spread estimator with **independent cascade** (IC) and **linear threshold** (LT) models.
+
+#### Reference
+[1] W. Chen, Y. Wang, and S. Yang, “Efficient influence maximization in social networks,” *Proceedings of the 15th ACM SIGKDD international conference on Knowledge discovery and data mining* - KDD 09, 2009.
+
+## Lab4 - Handwritten digit recognition
+
