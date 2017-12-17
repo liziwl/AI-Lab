@@ -73,3 +73,4 @@ Influence Maximization Problem is the problem of finding a small subset of nodes
 
 ## Lab4 - Handwritten digit recognition
 
+* [MNIST DATA](http://yann.lecun.com/exdb/mnist/)
