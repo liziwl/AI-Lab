@@ -139,11 +139,20 @@ def degreeDiscountIC(network, k, p=.01):
         if len(big_parent) != 0:
             degree_discount.put(temp[index])
             counter = 0
+            loop = set()
             while len(big_parent) != 0:
                 counter += 1
                 # print "round:",counter
                 index = random.randint(0, len(big_parent) - 1)
                 before = (big_parent, index)
+                # 判断是否有环
+                if big_parent[index] not in loop:
+                    loop.add(big_parent[index])
+                else:
+                    big_parent = list(loop)
+                    index = random.randint(0, len(big_parent) - 1)
+                    before = (big_parent, index)
+                    break
                 big_parent = find_big_parent(network, big_parent[index])
 
             big_parent, index = before
@@ -253,6 +262,7 @@ def solver(network, size, model, termination, utime, rand):
             s = Seed(degreeDiscountIC(grap, seed_size, 0.01))
             s.evaluate(model, grap)
             seeds.append(s)
+            # print i, s
 
         seeds = remove_duplicate(seeds)
         seeds.sort(reverse=True)
@@ -286,7 +296,8 @@ def solver(network, size, model, termination, utime, rand):
 
 if __name__ == "__main__":
     # network = "network.txt"
-    # size = 8
+    # network = "NetHEPT.txt"
+    # size = 4
     # model = "IC"
     # termination = 0
     # utime = 5
