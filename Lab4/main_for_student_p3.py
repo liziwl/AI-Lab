@@ -110,25 +110,6 @@ for i in range(len(test_labels)):
 loss = []
 accuracy = []
 
-# # loss
-# a1, z1, a2, z2, a3, y = forward(train_images, w1, w2, w3)
-# iloss = -(np.log(y) * onehot_labels).sum()
-# loss.append(iloss)
-# print("loss before", iloss)
-# # accuracy
-# x = test_images
-# a1, z1, a2, z2, a3, estimate = forward(x, w1, w2, w3)
-# out = []
-# for i in range(len(estimate)):
-#     out.append(np.argmax(estimate[i]))
-# counter = 0
-# for i in range(len(out)):
-#     if out[i] == test_labels[i]:
-#         counter += 1
-# print("accuracy", counter / len(out))
-# accuracy.append(counter / len(out))
-
-# for epoch in range(0, 10):
 for epoch in range(0, EPOCH):
     print("Epoch", epoch)
     if epoch < 50:
@@ -186,19 +167,23 @@ for epoch in range(0, EPOCH):
     print(accuracy)
 
 ### 4. Plot
-plt.figure(figsize=(12, 5))
+plt.figure(figsize=(6, 5))
 
 ax1 = plt.subplot(211)
 ax1.plot(loss, '.-')
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16)
+plt.xlabel("Epoch", fontsize=16)
+plt.ylabel("Loss", fontsize=16)
 plt.grid()
 plt.tight_layout()
 
 ax2 = plt.subplot(212)
 ax2.plot(accuracy, '.-')
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy")
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16)
+plt.xlabel("Epoch", fontsize=16)
+plt.ylabel("Accuracy", fontsize=16)
 plt.grid()
 plt.tight_layout()
 
