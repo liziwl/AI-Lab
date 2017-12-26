@@ -19,7 +19,7 @@ Lab 4: Python3
 * np.where  条件查找，返回下标
 
 numpy additional materials：
-1. [Doc](https://docs.scipy.org/doc/numpy/genindex.html)
+1. [numpy official doc](https://docs.scipy.org/doc/numpy/genindex.html)
 2. [TutorialsPoint NumPy 教程](http://www.jianshu.com/p/57e3c0a92f3a)
 
 ## Lab2 - Capacitated Arc Routing Problem (CARP)
