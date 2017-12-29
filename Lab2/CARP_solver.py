@@ -4,14 +4,14 @@ import sys
 import getopt
 import os
 import re
-import CARP
+import enter
 import time
 
 
 def command_line_reader(argv):
     try:
-        if len(argv) != 5:
-            raise getopt.GetoptError("The argument count should be 5, and now is {}.".format(len(argv)))
+        # if len(argv) != 5:
+        #     raise getopt.GetoptError("The argument count should be 5, and now is {}.".format(len(argv)))
 
         file_name = argv[0]
         if not os.path.isfile(file_name):
@@ -53,4 +53,4 @@ if __name__ == "__main__":
     # print 'termination: ', termination
     # print 'seed: ', seed
     # seed = None
-    CARP.search_CARP(file_name, termination, seed)
+    enter.search_CARP(file_name, termination, seed)

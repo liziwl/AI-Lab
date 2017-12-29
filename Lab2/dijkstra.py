@@ -1,7 +1,7 @@
 # encoding: utf-8
 import heapq
 import sys
-import CARP
+import enter
 import numpy as np
 
 
@@ -130,10 +130,10 @@ class Node(object):
 
 
 if __name__ == '__main__':
-    sample = CARP.read_data("CARP_samples\\egl-s1-A.dat")
+    sample = enter.read_data("CARP_samples\\egl-s1-A.dat")
     print sample
 
-    vmap = CARP.matrix_tran(sample)
+    vmap = enter.matrix_tran(sample)
 
     test1 = Dijkstra(vmap)
     test1.print_graph()
