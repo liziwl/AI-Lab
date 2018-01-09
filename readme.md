@@ -72,5 +72,12 @@ Influence Maximization Problem is the problem of finding a small subset of nodes
 [1] W. Chen, Y. Wang, and S. Yang, “Efficient influence maximization in social networks,” *Proceedings of the 15th ACM SIGKDD international conference on Knowledge discovery and data mining* - KDD 09, 2009.
 
 ## Lab4 - Handwritten digit recognition
+> implementing back propagation neural network
+## Layer Size
+* Inputer layer 784 nodes
+* Hidden layer1 300 nodes
+* Hidden layer2 100 nodes
+* Output layer 10 nodes
 
+## Data set
 * [MNIST DATA](http://yann.lecun.com/exdb/mnist/)
