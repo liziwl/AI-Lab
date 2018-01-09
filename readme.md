@@ -73,11 +73,11 @@ Influence Maximization Problem is the problem of finding a small subset of nodes
 
 ## Lab4 - Handwritten digit recognition
 > implementing back propagation neural network
-## Layer Size
+### Layer Size
 * Inputer layer 784 nodes
 * Hidden layer1 300 nodes
 * Hidden layer2 100 nodes
 * Output layer 10 nodes
 
-## Data set
+### Data set
 * [MNIST DATA](http://yann.lecun.com/exdb/mnist/)
