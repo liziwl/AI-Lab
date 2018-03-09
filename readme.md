@@ -6,6 +6,8 @@ Lab 1-3: Python2
 Lab 4: Python3 
 
 ## Lab1 - go
+[Report](./Lab1/doc/ProjectReport.pdf)
+
 示例文件共有7个（train_0.txt, train_00.txt, train_1.txt ~ train_5.txt），其中每个示例文件存放一个围棋残局，存放格式为“行数 列数 颜色”，-1表示⿊色，1表示白色，
 ### 要求
 1. train_0.txt和train_00.txt 检测程序对基本围棋规则的判定。
@@ -23,6 +25,7 @@ numpy additional materials：
 2. [TutorialsPoint NumPy 教程](http://www.jianshu.com/p/57e3c0a92f3a)
 
 ## Lab2 - Capacitated Arc Routing Problem (CARP)
+[Report](./Lab2/report/ProjectReport.pdf)
 
 ### Data Format
 
@@ -65,6 +68,7 @@ numpy additional materials：
 3. [Benchmarks of Vector Packing Problem](http://logistik.bwl.uni-mainz.de/benchmarks.php)
 
 ## Lab3 - Influence Maximization Problem
+[Report](./Lab3/report/Lab3.pdf)
 
 Influence Maximization Problem is the problem of finding a small subset of nodes(seed nodes) in a social network,that could maximize the spread of influence. The IMP is NP-hard and the influence spread computation is \#P -hard under the definitions shown in the introduction. I improve **Degree Discount IC** Algorithm [1], which can pick up the parent of high impact node. Besides, I also implement influence spread estimator with **independent cascade** (IC) and **linear threshold** (LT) models.
 
@@ -72,6 +76,8 @@ Influence Maximization Problem is the problem of finding a small subset of nodes
 [1] W. Chen, Y. Wang, and S. Yang, “Efficient influence maximization in social networks,” *Proceedings of the 15th ACM SIGKDD international conference on Knowledge discovery and data mining* - KDD 09, 2009.
 
 ## Lab4 - Handwritten digit recognition
+[Report](./Lab4/report/Lab4.pdf)
+
 > implementing back propagation neural network
 ### Layer Size
 * Inputer layer 784 nodes
